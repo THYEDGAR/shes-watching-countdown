@@ -89,24 +89,26 @@
         }
 
         function handleInput(event) {
-            const inputLine = document.getElementById("input-line");
-            if (event.key === "Enter") {
-                document.removeEventListener("keydown", handleInput);
-                terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '');
-                const currentInput = userInput.toLowerCase().trim();
+    const inputLine = document.getElementById("input-line");
+    if (event.key === "Enter") {
+        removeCursor(); // Clear all cursors before processing input
+        document.removeEventListener("keydown", handleInput);
+        clearInput(); // Clear the input container
 
-                if (correctAnswer.includes(currentInput)) {
-                    displaySuccess();
-                } else {
-                    displayRetry();
-                }
-            } else if (event.key === "Backspace") {
-                userInput = userInput.slice(0, -1);
-            } else if (event.key.length === 1) {
-                userInput += event.key;
-            }
-            inputLine.textContent = userInput;
+        const currentInput = userInput.toLowerCase().trim();
+
+        if (correctAnswer.includes(currentInput)) {
+            displaySuccess();
+        } else {
+            displayRetry();
         }
+    } else if (event.key === "Backspace") {
+        userInput = userInput.slice(0, -1);
+    } else if (event.key.length === 1) {
+        userInput += event.key;
+    }
+    inputLine.textContent = userInput;
+}
 
         async function displayRetry() {
     removeCursor(); // Forcefully remove all existing cursors
