@@ -10,20 +10,19 @@
             color: #ec461c;
             font-family: 'Courier New', monospace;
             margin: 0;
-            padding: 0;
+            padding: 20px;
             line-height: 1.5;
             white-space: pre-wrap;
-            height: 100vh;
-            overflow: hidden; /* Lock browser scrolling */
+            overflow: hidden;
         }
+
         #terminal {
             font-size: 1.2em;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end; /* Input stays at the bottom */
-            padding: 20px;
+            height: 100vh;
+            display: block;
+            overflow-y: hidden;
         }
+
         .cursor {
             display: inline-block;
             width: 10px;
@@ -31,13 +30,15 @@
             background-color: #ec461c;
             animation: blink 0.7s steps(2, start) infinite;
         }
+
         @keyframes blink {
             50% { opacity: 0; }
         }
+
         input {
             position: absolute;
-            top: -9999px;
-            opacity: 0; /* Hidden input field */
+            top: -9999px; /* Hidden input field */
+            opacity: 0;
         }
     </style>
 </head>
@@ -55,13 +56,18 @@
         // Typing effect for automated messages
         async function typeLine(line, typingSpeed = 75) {
             isTyping = true;
-            const cursor = '<span class="cursor"></span>';
             let output = "";
+            const cursor = '<span class="cursor"></span>';
+            const container = document.createElement("div");
+            terminal.appendChild(container);
+
             for (let i = 0; i < line.length; i++) {
                 output += line[i];
-                terminal.lastChild.innerHTML = output + cursor;
+                container.innerHTML = output + cursor;
                 await pause(typingSpeed);
             }
+
+            container.innerHTML = output;
             isTyping = false;
         }
 
@@ -76,9 +82,7 @@
             ];
 
             for (const line of lines) {
-                const div = document.createElement("div");
-                div.innerHTML = `<span>${line}</span>`;
-                terminal.appendChild(div);
+                await typeLine(line);
                 await pause(1000);
             }
 
@@ -95,9 +99,7 @@
             ];
 
             for (const line of riddle) {
-                const div = document.createElement("div");
-                div.innerHTML = `<span>${line}</span>`;
-                terminal.appendChild(div);
+                await typeLine(line);
                 await pause(1000);
             }
         }
@@ -110,8 +112,8 @@
             terminal.appendChild(inputLine);
             hiddenInput.value = "";
             hiddenInput.focus();
-            userInput = "";
 
+            userInput = "";
             hiddenInput.oninput = updateInput;
             hiddenInput.onkeydown = handleInput;
         }
@@ -138,31 +140,37 @@
             const inputLine = document.getElementById("input-container");
 
             if (correctAnswer.includes(currentInput)) {
-                inputLine.innerHTML = `<span id="input-line">You’ve found her...</span>`;
+                await typeResponse("You’ve found her...", inputLine);
                 await pause(1000);
-                await typeLine(" but at what cost?");
+                await typeResponse(" but at what cost?", inputLine);
                 await pause(2000);
-                inputLine.innerHTML += "<br>Goodbye...";
+                await typeResponse("Goodbye...", inputLine);
             } else {
-                await displayRetry(inputLine);
+                await typeResponse("Wrong answer...", inputLine);
+                await pause(1000);
+                await deleteText(inputLine);
+                await typeResponse("Try again:", inputLine);
+                hiddenInput.value = "";
+                userInput = "";
             }
 
             isTyping = false;
         }
 
-        async function displayRetry(inputLine) {
-            await typeLine(" Wrong answer...", 75);
-            await pause(1000);
-            await deleteText(inputLine);
-            await typeLine("Try again: ", 75);
-            hiddenInput.value = "";
-            userInput = "";
+        async function typeResponse(message, inputLine) {
+            let output = "";
+            for (let i = 0; i < message.length; i++) {
+                output += message[i];
+                inputLine.innerHTML = output + '<span class="cursor"></span>';
+                await pause(50);
+            }
+            inputLine.innerHTML = output;
         }
 
         async function deleteText(inputLine) {
             let text = userInput;
             for (let i = text.length; i >= 0; i--) {
-                inputLine.innerHTML = `<span id="input-line">${text.slice(0, i)}</span><span class="cursor"></span>`;
+                inputLine.innerHTML = text.slice(0, i) + '<span class="cursor"></span>';
                 await pause(50);
             }
         }
