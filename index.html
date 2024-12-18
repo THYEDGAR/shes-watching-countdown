@@ -13,7 +13,7 @@
             margin: 0;
             padding: 20px;
             line-height: 1.5;
-            white-space: pre-wrap; /* Keeps line breaks */
+            white-space: pre-wrap;
             overflow: hidden;
         }
         #terminal {
@@ -85,13 +85,11 @@
             if (!inputMode) return;
 
             const inputLine = document.getElementById("input-line");
-            const cursor = document.querySelector(".cursor");
-
             if (event.key === "Enter") {
                 inputMode = false;
                 document.removeEventListener("keydown", handleInput);
+                terminal.innerHTML += "<br>"; // Move cursor to new line
                 const currentInput = userInput.toLowerCase().trim();
-                terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '');
                 if (currentInput === correctAnswer) {
                     displaySuccess();
                 } else {
@@ -102,38 +100,37 @@
             } else if (event.key.length === 1) {
                 userInput += event.key;
             }
-
             inputLine.textContent = userInput;
         }
 
         async function displayRetry() {
+            await typeLine("Wrong answer... Try again:", 75);
             terminal.innerHTML += "<br>";
-            await typeLine("Wrong answer... Try again:");
-            await pause(500);
-            startInput(); // Restart input on a new line
+            startInput();
         }
 
         async function displaySuccess() {
-            terminal.innerHTML += "<br>";
             await typeLine("You’ve found her... but at what cost?", 100);
             await pause(1500);
+            terminal.innerHTML += "<br>";
             await typeLine("Goodbye...", 150);
             await pause(2000);
             terminal.innerHTML += "<br>";
+            removeCursor();
             startCountdown();
         }
 
         function startCountdown() {
             const countdownTarget = new Date("2025-01-01T00:00:00").getTime();
-            const countdownContainer = document.createElement("div");
-            terminal.appendChild(countdownContainer);
+            const countdownLine = document.createElement("div");
+            terminal.appendChild(countdownLine);
 
             function updateCountdown() {
                 const now = new Date().getTime();
                 const distance = countdownTarget - now;
 
                 if (distance < 0) {
-                    countdownContainer.textContent = "Countdown: SHE'S HERE!";
+                    countdownLine.textContent = "Countdown: SHE'S HERE!";
                     return;
                 }
 
@@ -142,7 +139,7 @@
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-                countdownContainer.textContent = `Countdown: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+                countdownLine.textContent = `Countdown: ${days}d ${hours}h ${minutes}m ${seconds}s`;
                 setTimeout(updateCountdown, 1000);
             }
 
@@ -153,8 +150,5 @@
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-        // Start the typing sequence
-        startTypingSequence();
-    </script>
-</body>
-</html>
+        function removeCursor() {
+            const cursor = document.querySelector(".cursor");
