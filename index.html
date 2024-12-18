@@ -14,7 +14,7 @@
             line-height: 1.5;
             white-space: pre-wrap;
             height: 100vh;
-            overflow: hidden; /* Disable scrolling */
+            overflow: hidden;
         }
         #terminal {
             font-size: 1.2em;
@@ -45,8 +45,9 @@
         const hiddenInput = document.getElementById("hidden-input");
         const correctAnswer = ["echo", "an echo"];
         let userInput = "";
-        let isTyping = false; // Blocks input during automated messages
+        let isTyping = false;
 
+        // Typing effect for automated messages
         async function typeLine(line, typingSpeed = 75) {
             isTyping = true;
             return new Promise(resolve => {
@@ -63,7 +64,7 @@
                     if (i === line.length) {
                         clearInterval(interval);
                         isTyping = false;
-                        scrollToBottom();
+                        scrollToInput();
                         resolve();
                     }
                 }, typingSpeed);
@@ -96,38 +97,40 @@
             await pause(1000);
             terminal.innerHTML += "<br>";
             await typeLine("What am I?");
+            await pause(1000);
             terminal.innerHTML += "<br>";
             startInput();
         }
 
         function startInput() {
-            if (isTyping) return; // Prevent input during typing
+            if (isTyping) return;
+            removeCursor();
             clearInput();
             terminal.innerHTML += `<div id="input-container"><span id="input-line"></span><span class="cursor"></span></div>`;
-            scrollToBottom();
-
+            scrollToInput();
             hiddenInput.value = "";
             hiddenInput.focus();
+            userInput = "";
+
             hiddenInput.oninput = updateInput;
             hiddenInput.onkeydown = handleInput;
         }
 
         function updateInput() {
+            if (isTyping) return;
             const inputLine = document.getElementById("input-line");
             userInput = hiddenInput.value;
             inputLine.textContent = userInput;
-            scrollToBottom();
+            scrollToInput();
         }
 
         function handleInput(event) {
-            if (isTyping) return; // Prevent input during automated messages
-            if (event.key === "Enter") {
-                processInput();
-            }
+            if (isTyping) return;
+            if (event.key === "Enter") processInput();
         }
 
         function processInput() {
-            if (isTyping) return; // Block during typing
+            if (isTyping) return;
             removeCursor();
             const currentInput = userInput.toLowerCase().trim();
             terminal.innerHTML += "<br>";
@@ -144,7 +147,7 @@
             await typeLine("Wrong answer...", 75);
             await pause(1000);
             terminal.innerHTML += "<br>";
-            await typeLine("Try again:", 75);
+            await typeLine("Try again:");
             terminal.innerHTML += "<br>";
             isTyping = false;
             startInput();
@@ -182,16 +185,18 @@
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
                 countdownLine.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-                scrollToBottom();
                 setTimeout(updateCountdown, 1000);
             }
 
             updateCountdown();
         }
 
-        function scrollToBottom() {
+        function scrollToInput() {
             setTimeout(() => {
-                window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+                const inputContainer = document.getElementById("input-container");
+                if (inputContainer) {
+                    inputContainer.scrollIntoView({ behavior: "smooth", block: "center" });
+                }
             }, 50);
         }
 
