@@ -103,33 +103,32 @@
     startInput();
 } // This closing bracket was missing
 
-        function startInput() {
-            if (isTyping) return;
-            removeCursor();
-            clearInput();
-            terminal.innerHTML += `<div id="input-container"><span id="input-line"></span><span class="cursor"></span></div>`;
-            scrollToBottom();
-            hiddenInput.focus();
-            hiddenInput.value = "";
-            userInput = "";
+       function startInput() {
+    if (isTyping) return;
+    removeCursor();
+    clearInput();
+    terminal.innerHTML += `<div id="input-container"><span id="input-line"></span><span class="cursor"></span></div>`;
+    scrollToBottom();
 
-            // Ensure cursor focus on mobile
-            const cursor = document.querySelector(".cursor");
-            cursor.addEventListener("click", () => {
-                hiddenInput.focus();
-                scrollToBottom();
-            });
+    // Focus the hidden input
+    setTimeout(() => hiddenInput.focus(), 100);
 
-            hiddenInput.addEventListener("input", updateInput);
-            hiddenInput.addEventListener("keydown", handleInput);
-        }
+    hiddenInput.value = "";
+    userInput = "";
+    hiddenInput.addEventListener("input", updateInput);
+    hiddenInput.addEventListener("keydown", handleInput);
+}
 
-       function updateInput() {
+      function updateInput() {
     if (isTyping) return; // Block typing during automated messages
     const inputLine = document.getElementById("input-line");
     userInput = hiddenInput.value;
     inputLine.textContent = userInput;
-    scrollToBottom();
+
+    // Only scroll on specific events to avoid jitter
+    if (event.inputType === "insertText" || event.inputType === "deleteContentBackward") {
+        scrollToBottom();
+    }
 }
 
 function handleInput(event) {
@@ -202,15 +201,15 @@ function handleInput(event) {
             updateCountdown();
         }
 
-        function scrollToBottom() {
-    const inputContainer = document.getElementById("input-container");
-    if (inputContainer) {
-        inputContainer.scrollIntoView({ behavior: "smooth", block: "center" });
-    } else {
-        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-    }
+       function scrollToBottom() {
+    setTimeout(() => {
+        const inputContainer = document.getElementById("input-container");
+        if (inputContainer) {
+            const scrollPosition = inputContainer.offsetTop - window.innerHeight / 2; 
+            window.scrollTo({ top: scrollPosition, behavior: "smooth" });
+        }
+    }, 50); // Slight delay to avoid conflict
 }
-
         function pause(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
