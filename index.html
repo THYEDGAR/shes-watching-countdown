@@ -14,7 +14,7 @@
             line-height: 1.5;
             white-space: pre-wrap;
             height: 100vh;
-            overflow: hidden; /* Disable manual scrolling */
+            overflow: hidden; /* Disable scrolling */
         }
         #terminal {
             font-size: 1.2em;
@@ -45,7 +45,7 @@
         const hiddenInput = document.getElementById("hidden-input");
         const correctAnswer = ["echo", "an echo"];
         let userInput = "";
-        let isTyping = false;
+        let isTyping = false; // Blocks input during automated messages
 
         async function typeLine(line, typingSpeed = 75) {
             isTyping = true;
@@ -84,7 +84,6 @@
                 await typeLine(line);
                 await pause(1000);
                 terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '') + "<br>";
-                scrollToBottom();
             }
 
             await typeLine('"I have no form but can take any shape."');
@@ -97,38 +96,23 @@
             await pause(1000);
             terminal.innerHTML += "<br>";
             await typeLine("What am I?");
-            await pause(1000);
             terminal.innerHTML += "<br>";
             startInput();
         }
 
         function startInput() {
-            if (isTyping) return;
-            removeCursor();
+            if (isTyping) return; // Prevent input during typing
             clearInput();
-
-            terminal.innerHTML += `<div id="input-container">
-                                    <span id="input-line"></span>
-                                    <span class="cursor"></span>
-                                </div>`;
+            terminal.innerHTML += `<div id="input-container"><span id="input-line"></span><span class="cursor"></span></div>`;
             scrollToBottom();
 
             hiddenInput.value = "";
             hiddenInput.focus();
-            userInput = "";
-
-            const cursor = document.querySelector(".cursor");
-            cursor.addEventListener("click", () => {
-                hiddenInput.focus();
-                scrollToBottom();
-            });
-
             hiddenInput.oninput = updateInput;
             hiddenInput.onkeydown = handleInput;
         }
 
         function updateInput() {
-            if (isTyping) return;
             const inputLine = document.getElementById("input-line");
             userInput = hiddenInput.value;
             inputLine.textContent = userInput;
@@ -136,14 +120,14 @@
         }
 
         function handleInput(event) {
-            if (isTyping) return;
+            if (isTyping) return; // Prevent input during automated messages
             if (event.key === "Enter") {
                 processInput();
             }
         }
 
         function processInput() {
-            if (isTyping) return;
+            if (isTyping) return; // Block during typing
             removeCursor();
             const currentInput = userInput.toLowerCase().trim();
             terminal.innerHTML += "<br>";
@@ -164,7 +148,6 @@
             terminal.innerHTML += "<br>";
             isTyping = false;
             startInput();
-            scrollToBottom();
         }
 
         async function displaySuccess() {
@@ -208,10 +191,7 @@
 
         function scrollToBottom() {
             setTimeout(() => {
-                const inputContainer = document.getElementById("input-container");
-                if (inputContainer) {
-                    inputContainer.scrollIntoView({ behavior: "smooth", block: "center" });
-                }
+                window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
             }, 50);
         }
 
