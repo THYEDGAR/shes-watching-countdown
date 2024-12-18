@@ -108,17 +108,19 @@
             startInput();
         }
 
-        async function displaySuccess() {
-            clearInput();
-            await typeLine("You’ve found her... but at what cost?", 100);
-            await pause(1500);
-            terminal.innerHTML += "<br>";
-            await typeLine("Goodbye...", 150);
-            await pause(2000);
-            terminal.innerHTML += "<br>";
-            removeCursor();
-            startCountdown();
-        }
+       async function displaySuccess() {
+    clearInput();
+    await typeLine("You’ve found her...", 100); // First part
+    await pause(1000); // Subtle pause for tension
+    await typeLine(" but at what cost?", 150); // Slowly type second part
+    await pause(1500);
+    terminal.innerHTML += "<br>";
+    await typeLine("Goodbye...", 150);
+    await pause(2000);
+    terminal.innerHTML += "<br>";
+    removeCursor();
+    startCountdown();
+}
 
         function startCountdown() {
             const countdownTarget = new Date("2025-01-01T00:00:00").getTime();
