@@ -25,21 +25,28 @@
             height: 1.2em;
             background-color: #ec461c;
             animation: blink 0.7s steps(2, start) infinite;
-            cursor: pointer; /* Add pointer cursor for clickable behavior */
+            cursor: pointer; /* Makes the cursor tappable */
         }
         @keyframes blink {
             50% { opacity: 0; }
+        }
+        input {
+            position: absolute;
+            top: -9999px; /* Hides the input field off-screen */
+            opacity: 0;
         }
     </style>
 </head>
 <body>
     <div id="terminal"></div>
+    <input type="text" id="hidden-input" autocomplete="off" />
 
     <script>
         const terminal = document.getElementById("terminal");
+        const hiddenInput = document.getElementById("hidden-input"); // Hidden input field
         const correctAnswer = ["echo", "an echo"]; // Accept multiple correct answers
         let userInput = "";
-        let inputAllowed = false; // Controls whether typing is allowed
+        let inputAllowed = false;
 
         // Typing effect for dynamic lines
         async function typeLine(line, typingSpeed = 75) {
@@ -73,13 +80,12 @@
             ];
 
             for (const line of lines) {
-                inputAllowed = false; // Disable input during automated messages
+                inputAllowed = false; // Prevent input during automated messages
                 await typeLine(line);
                 await pause(1000);
                 terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '') + "<br>";
             }
 
-            // Add riddle separately with delay
             await typeLine('"I have no voice, but I can still make you listen. What am I?"');
             await pause(1000);
             terminal.innerHTML += "<br>";
@@ -88,10 +94,9 @@
         }
 
         function startInput() {
-            removeCursor(); // Remove all cursors globally
-            clearInput();   // Remove any previous input container
+            removeCursor();
+            clearInput();
 
-            // Force a visible new input line
             const inputContainer = `<div id="input-container">
                                         <span id="input-line"></span>
                                         <span class="cursor"></span>
@@ -99,98 +104,55 @@
             terminal.innerHTML += inputContainer;
 
             const cursor = document.querySelector(".cursor");
-            cursor.addEventListener("click", () => focusInput()); // Make the cursor clickable
+            cursor.addEventListener("click", () => hiddenInput.focus()); // Focus hidden input
 
-            inputAllowed = true; // Allow input after messages finish
-            userInput = ""; // Reset input text
+            hiddenInput.focus(); // Automatically focus on hidden input
+            inputAllowed = true;
+
+            hiddenInput.addEventListener("input", updateInput);
+            hiddenInput.addEventListener("keydown", handleInput);
         }
 
-        function focusInput() {
-            if (!inputAllowed) return; // Prevent focusing if input isn't allowed
+        function updateInput() {
             const inputLine = document.getElementById("input-line");
-            inputLine.focus(); // Simulate focus for the input line
-        }
-
-        function handleInput(event) {
-            if (!inputAllowed) return; // Ignore input if not allowed
-
-            const inputLine = document.getElementById("input-line");
-            if (event.key === "Enter") {
-                removeCursor(); // Clear all cursors before processing input
-                document.removeEventListener("keydown", handleInput);
-                clearInput(); // Clear the input container
-
-                const currentInput = userInput.toLowerCase().trim();
-
-                if (correctAnswer.includes(currentInput)) {
-                    displaySuccess();
-                } else {
-                    displayRetry();
-                }
-            } else if (event.key === "Backspace") {
-                userInput = userInput.slice(0, -1);
-            } else if (event.key.length === 1) {
-                userInput += event.key;
-            }
+            userInput = hiddenInput.value;
             inputLine.textContent = userInput;
         }
 
+        function handleInput(event) {
+            if (event.key === "Enter" && inputAllowed) {
+                hiddenInput.blur(); // Remove focus from hidden input
+                processInput();
+            }
+        }
+
+        function processInput() {
+            inputAllowed = false; // Prevent additional input
+            const currentInput = userInput.toLowerCase().trim();
+            clearInput();
+
+            if (correctAnswer.includes(currentInput)) {
+                displaySuccess();
+            } else {
+                displayRetry();
+            }
+        }
+
         async function displayRetry() {
-            removeCursor(); // Forcefully remove all existing cursors
-            clearInput(); // Clear the old input box
-
-            // Add retry messages on clean lines
-            terminal.innerHTML += "<br>"; // Move to a new line
             await typeLine("Wrong answer...", 75);
-
             await pause(1000);
-
-            terminal.innerHTML += "<br>"; // New line for "Try again:"
+            terminal.innerHTML += "<br>";
             await typeLine("Try again.", 75);
-
-            // Restart the input cleanly
             terminal.innerHTML += "<br>";
             startInput();
         }
 
         async function displaySuccess() {
-            clearInput();
             await typeLine("You’ve found her...", 100);
-            await pause(1000); // Subtle pause for tension
+            await pause(1000);
             await typeLine(" but at what cost?", 150);
-            await pause(1500);
             terminal.innerHTML += "<br>";
             await typeLine("Goodbye...", 150);
-            await pause(2000);
-            terminal.innerHTML += "<br>";
-            removeCursor();
-            startCountdown();
-        }
-
-        function startCountdown() {
-            const countdownTarget = new Date("2025-01-01T00:00:00").getTime();
-            const countdownLine = document.createElement("div");
-            terminal.appendChild(countdownLine);
-
-            function updateCountdown() {
-                const now = new Date().getTime();
-                const distance = countdownTarget - now;
-
-                if (distance < 0) {
-                    countdownLine.textContent = "SHE'S HERE!";
-                    return;
-                }
-
-                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                countdownLine.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-                setTimeout(updateCountdown, 1000);
-            }
-
-            updateCountdown();
         }
 
         function pause(ms) {
@@ -204,6 +166,8 @@
         function clearInput() {
             const oldInput = document.getElementById("input-container");
             if (oldInput) oldInput.remove();
+            hiddenInput.value = ""; // Reset hidden input field
+            userInput = "";
         }
 
         // Start the typing sequence
