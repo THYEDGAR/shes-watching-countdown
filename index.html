@@ -72,35 +72,36 @@
         }
 
         async function startTypingSequence() {
-            const lines = [
-                "Greetings, stranger...",
-                "It's been a while...",
-                "But it's also nice seeing you again...",
-                "I have something for you...",
-                "A riddle!",
-                "Pay close attention..."
-            ];
+    const lines = [
+        "Greetings, stranger...",
+        "It's been a while...",
+        "But it's also nice seeing you again...",
+        "I have something for you...",
+        "A riddle!",
+        "Pay close attention..."
+    ];
 
-            for (const line of lines) {
-                await typeLine(line);
-                await pause(1000);
-                terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '') + "<br>";
-                scrollToBottom();
-            }
+    for (const line of lines) {
+        await typeLine(line);
+        await pause(1000);
+        terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '') + "<br>";
+        scrollToBottom();
+    }
 
-            await typeLine('"I have no form but can take any shape."');
-await pause(1000);
-terminal.innerHTML += "<br>";
-await typeLine('"I am neither light nor shadow, but I still escape."');
-await pause(1000);
-terminal.innerHTML += "<br>";
-await typeLine('"I grow when you’re loud and fade when you’re still."');
-await pause(1000);
-terminal.innerHTML += "<br>";
-await typeLine("What am I?");
-await pause(1000);
-terminal.innerHTML += "<br>";
-startInput();
+    await typeLine('"I have no form but can take any shape."');
+    await pause(1000);
+    terminal.innerHTML += "<br>";
+    await typeLine('"I am neither light nor shadow, but I still escape."');
+    await pause(1000);
+    terminal.innerHTML += "<br>";
+    await typeLine('"I grow when you’re loud and fade when you’re still."');
+    await pause(1000);
+    terminal.innerHTML += "<br>";
+    await typeLine("What am I?");
+    await pause(1000);
+    terminal.innerHTML += "<br>";
+    startInput();
+} // <---- Missing bracket added here
 
         function startInput() {
             if (isTyping) return;
