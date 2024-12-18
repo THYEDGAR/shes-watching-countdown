@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>She's Watching</title>
+    <title>SHE'S WATCHING</title>
     <style>
         /* Base Terminal Style */
         body {
@@ -36,7 +36,7 @@
 
     <script>
         const terminal = document.getElementById("terminal");
-        const correctAnswer = "echo";
+        const correctAnswer = ["echo", "an echo"]; // Accept multiple correct answers
         let userInput = "";
 
         // Typing effect for dynamic lines
@@ -44,6 +44,7 @@
             return new Promise(resolve => {
                 let i = 0;
                 const cursor = '<span class="cursor"></span>';
+                removeCursor();
                 const interval = setInterval(() => {
                     terminal.innerHTML = terminal.innerHTML.replace(cursor, "");
                     terminal.innerHTML += line[i];
@@ -58,25 +59,27 @@
         }
 
         async function startTypingSequence() {
-    const lines = [
-        "Greetings, stranger...",
-        "I have something for you...",
-        "A riddle:" // Add pause after this
-    ];
+            const lines = [
+                "Greetings, stranger...",
+                "It's nice seeing you again...",
+                "I have something for you...",
+                "A riddle:",
+                "Pay close attention..."
+            ];
 
-    for (const line of lines) {
-        await typeLine(line);
-        await pause(1000); // 1-second pause
-        terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '') + "<br>";
-    }
+            for (const line of lines) {
+                await typeLine(line);
+                await pause(1000);
+                terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '') + "<br>";
+            }
 
-    // Add riddle separately with delay
-    await typeLine('"I have no voice, but I can still make you listen. What am I?"');
-    await pause(1000);
-    terminal.innerHTML += "<br>";
-    await typeLine("Type your answer and press Enter:");
-    startInput();
-}
+            // Add riddle separately with delay
+            await typeLine('"I have no voice, but I can still make you listen. What am I?"');
+            await pause(1000);
+            terminal.innerHTML += "<br>";
+            await typeLine("Type your answer and press Enter.");
+            startInput();
+        }
 
         function startInput() {
             userInput = "";
@@ -92,7 +95,7 @@
                 terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '');
                 const currentInput = userInput.toLowerCase().trim();
 
-                if (currentInput === correctAnswer) {
+                if (correctAnswer.includes(currentInput)) {
                     displaySuccess();
                 } else {
                     displayRetry();
@@ -106,27 +109,27 @@
         }
 
         async function displayRetry() {
-    clearInput(); // Remove old input line
-    await typeLine("Wrong answer...", 75); // First part
-    await pause(1000); // 1-second pause
-    await typeLine(" Try again:", 75); // Second part
-    terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '') + "<br>";
-    startInput();
-}
+            clearInput(); // Remove old input line
+            await typeLine("Wrong answer...", 75);
+            await pause(1000); // Subtle pause
+            await typeLine(" Try again:", 75);
+            terminal.innerHTML += "<br>";
+            startInput();
+        }
 
-       async function displaySuccess() {
-    clearInput();
-    await typeLine("You’ve found her...", 100); // First part
-    await pause(1000); // Subtle pause for tension
-    await typeLine(" but at what cost?", 150); // Slowly type second part
-    await pause(1500);
-    terminal.innerHTML += "<br>";
-    await typeLine("Goodbye...", 150);
-    await pause(2000);
-    terminal.innerHTML += "<br>";
-    removeCursor();
-    startCountdown();
-}
+        async function displaySuccess() {
+            clearInput();
+            await typeLine("You’ve found her...", 100);
+            await pause(1000); // Subtle pause for tension
+            await typeLine(" but at what cost?", 150);
+            await pause(1500);
+            terminal.innerHTML += "<br>";
+            await typeLine("Goodbye...", 150);
+            await pause(2000);
+            terminal.innerHTML += "<br>";
+            removeCursor();
+            startCountdown();
+        }
 
         function startCountdown() {
             const countdownTarget = new Date("2025-01-01T00:00:00").getTime();
@@ -138,7 +141,7 @@
                 const distance = countdownTarget - now;
 
                 if (distance < 0) {
-                    countdownLine.textContent = "Countdown: SHE'S HERE!";
+                    countdownLine.textContent = "SHE'S HERE!";
                     return;
                 }
 
@@ -147,7 +150,7 @@
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-                countdownLine.textContent = `Countdown: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+                countdownLine.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
                 setTimeout(updateCountdown, 1000);
             }
 
