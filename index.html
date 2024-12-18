@@ -124,18 +124,20 @@
             hiddenInput.addEventListener("keydown", handleInput);
         }
 
-        function updateInput() {
-            if (isTyping) return;
-            const inputLine = document.getElementById("input-line");
-            userInput = hiddenInput.value;
-            inputLine.textContent = userInput;
-            scrollToBottom();
-        }
+       function updateInput() {
+    if (isTyping) return; // Block typing during automated messages
+    const inputLine = document.getElementById("input-line");
+    userInput = hiddenInput.value;
+    inputLine.textContent = userInput;
+    scrollToBottom();
+}
 
-        function handleInput(event) {
-            if (isTyping) return;
-            if (event.key === "Enter") processInput();
-        }
+function handleInput(event) {
+    if (isTyping) return; // Block Enter presses during automated messages
+    if (event.key === "Enter") {
+        processInput();
+    }
+}
 
         function processInput() {
             if (isTyping) return;
@@ -201,10 +203,13 @@
         }
 
         function scrollToBottom() {
-            setTimeout(() => {
-                window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-            }, 100); // Slight delay ensures accurate scrolling
-        }
+    const inputContainer = document.getElementById("input-container");
+    if (inputContainer) {
+        inputContainer.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    }
+}
 
         function pause(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
