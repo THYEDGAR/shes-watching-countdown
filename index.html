@@ -31,7 +31,7 @@
         }
         input {
             position: absolute;
-            top: -9999px; /* Hidden input field */
+            top: -9999px;
             opacity: 0;
         }
     </style>
@@ -115,17 +115,19 @@
             hiddenInput.value = "";
             hiddenInput.focus();
             const cursor = document.querySelector(".cursor");
+
+            // Ensure focus on tap (mobile fix)
             cursor.addEventListener("click", () => {
                 hiddenInput.focus();
             });
-            userInput = "";
 
+            userInput = "";
             hiddenInput.oninput = updateInput;
             hiddenInput.onkeydown = handleInput;
         }
 
         function updateInput() {
-            if (isTyping) return;
+            if (isTyping) return; // Prevent typing during automated messages
             const inputLine = document.getElementById("input-line");
             userInput = hiddenInput.value;
             inputLine.textContent = userInput;
@@ -133,12 +135,12 @@
         }
 
         function handleInput(event) {
-            if (isTyping) return;
+            if (isTyping) return; // Prevent input during automated messages
             if (event.key === "Enter") processInput();
         }
 
         function processInput() {
-            if (isTyping) return;
+            if (isTyping) return; // Block Enter during automated messages
             removeCursor();
             const currentInput = userInput.toLowerCase().trim();
             terminal.innerHTML += "<br>";
@@ -151,7 +153,7 @@
         }
 
         async function displayRetry() {
-            isTyping = true;
+            isTyping = true; // Prevent typing during retry message
             await typeLine("Wrong answer...", 75);
             await pause(1000);
             terminal.innerHTML += "<br>";
