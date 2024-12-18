@@ -103,36 +103,39 @@
     startInput();
 } // This closing bracket was missing
 
-       function startInput() {
+  function startInput() {
     if (isTyping) return;
     removeCursor();
     clearInput();
+
     terminal.innerHTML += `<div id="input-container"><span id="input-line"></span><span class="cursor"></span></div>`;
     scrollToBottom();
 
-    // Focus the hidden input
-    setTimeout(() => hiddenInput.focus(), 100);
-
     hiddenInput.value = "";
+    hiddenInput.focus(); // Ensure hidden input gets focus
     userInput = "";
+
+    // Enable focusing when tapping the cursor
+    const cursor = document.querySelector(".cursor");
+    cursor.addEventListener("click", () => {
+        hiddenInput.focus();
+        scrollToBottom();
+    });
+
     hiddenInput.addEventListener("input", updateInput);
     hiddenInput.addEventListener("keydown", handleInput);
 }
 
-      function updateInput() {
+ function updateInput() {
     if (isTyping) return; // Block typing during automated messages
     const inputLine = document.getElementById("input-line");
-    userInput = hiddenInput.value;
+    userInput = hiddenInput.value; // Sync hidden input with visible line
     inputLine.textContent = userInput;
-
-    // Only scroll on specific events to avoid jitter
-    if (event.inputType === "insertText" || event.inputType === "deleteContentBackward") {
-        scrollToBottom();
-    }
+    scrollToBottom();
 }
 
 function handleInput(event) {
-    if (isTyping) return; // Block Enter presses during automated messages
+    if (isTyping) return; // Block all input while messages are typing
     if (event.key === "Enter") {
         processInput();
     }
@@ -152,15 +155,17 @@ function handleInput(event) {
         }
 
         async function displayRetry() {
-            isTyping = true;
-            await typeLine("Wrong answer...", 75);
-            await pause(1000);
-            terminal.innerHTML += "<br>";
-            await typeLine("Try again:");
-            terminal.innerHTML += "<br>";
-            isTyping = false;
-            startInput();
-        }
+    isTyping = true; // Block user input
+    await typeLine("Wrong answer...", 75);
+    await pause(1000);
+
+    terminal.innerHTML += "<br>";
+    await typeLine("Try again:", 75);
+    terminal.innerHTML += "<br>";
+    isTyping = false; // Re-enable input
+    startInput(); // Restart input on a clean line
+    scrollToBottom();
+}
 
         async function displaySuccess() {
             isTyping = true;
