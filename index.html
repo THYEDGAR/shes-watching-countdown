@@ -14,6 +14,7 @@
             padding: 20px;
             line-height: 1.5;
             white-space: pre-wrap; /* Keeps line breaks */
+            overflow: hidden;
         }
         #terminal {
             font-size: 1.2em;
@@ -36,50 +37,55 @@
     <script>
         const terminal = document.getElementById("terminal");
         const lines = [
-            "Greetings, stranger..._", 
-            "I have a riddle..._", 
-            "\"I have no voice, but I can still make you listen. What am I?\"_", 
-            "_"
+            "Greetings, stranger...",
+            "I have something for you...",
+            "A riddle: \"I have no voice, but I can still make you listen. What am I?\"",
+            "Type your answer and press Enter:"
         ];
-        
-        const correctAnswer = "echo"; // Riddle answer
-        let inputMode = false; // Tracks if user is typing
+
+        const correctAnswer = "echo";
+        let inputMode = false; // Locks typing until ready
         let userInput = ""; // Tracks user input
 
-        // Typing effect
-        function typeLine(line, callback) {
-            let i = 0;
-            const interval = setInterval(() => {
-                terminal.innerHTML += line[i];
-                i++;
-                if (i === line.length) {
-                    clearInterval(interval);
-                    terminal.innerHTML += "<br>"; // Move to the next line
-                    callback();
-                }
-            }, 50); // Typing speed
+        // Typing effect with pauses
+        async function typeLine(line) {
+            return new Promise(resolve => {
+                let i = 0;
+                const cursor = '<span class="cursor"></span>';
+                const interval = setInterval(() => {
+                    terminal.innerHTML = terminal.innerHTML.replace(cursor, ""); // Remove old cursor
+                    terminal.innerHTML += line[i];
+                    i++;
+                    terminal.innerHTML += cursor; // Append cursor again
+
+                    if (i === line.length) {
+                        clearInterval(interval);
+                        resolve();
+                    }
+                }, 75); // Typing speed
+            });
         }
 
-        // Start the typing sequence
-        function startTypingSequence() {
-            let lineIndex = 0;
-
-            function nextLine() {
-                if (lineIndex < lines.length) {
-                    typeLine(lines[lineIndex], nextLine);
-                    lineIndex++;
-                } else {
-                    // After typing the last prompt, allow user input
-                    inputMode = true;
-                    terminal.innerHTML += `<span id="input-line"></span><span class="cursor"></span>`;
-                    document.addEventListener("keydown", handleInput);
-                }
+        async function typeSequenceWithPauses() {
+            for (const line of lines) {
+                await typeLine(line);
+                await pause(1000); // Pause before moving to next line
+                terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '') + '<br>';
             }
-
-            nextLine();
+            // Unlock input after the typing is done
+            startInput();
         }
 
-        // Handle user input
+        function pause(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function startInput() {
+            inputMode = true;
+            terminal.innerHTML += `<span id="input-line"></span><span class="cursor"></span>`;
+            document.addEventListener("keydown", handleInput);
+        }
+
         function handleInput(event) {
             if (!inputMode) return;
 
@@ -87,12 +93,16 @@
             const cursor = document.querySelector(".cursor");
 
             if (event.key === "Enter") {
+                inputMode = false;
+                document.removeEventListener("keydown", handleInput);
                 if (userInput.toLowerCase().trim() === correctAnswer) {
                     displaySuccess();
                 } else {
-                    terminal.innerHTML += `\nWrong answer... Try again:_<br>`;
+                    terminal.innerHTML += `<br>Wrong answer... Try again:<br>`;
                     userInput = "";
-                    inputLine.innerHTML = "";
+                    terminal.innerHTML += `<span id="input-line"></span><span class="cursor"></span>`;
+                    inputMode = true;
+                    document.addEventListener("keydown", handleInput);
                 }
             } else if (event.key === "Backspace") {
                 userInput = userInput.slice(0, -1);
@@ -103,20 +113,20 @@
             inputLine.innerHTML = userInput;
         }
 
-        // Success message with countdown
         function displaySuccess() {
-            inputMode = false;
-            document.removeEventListener("keydown", handleInput);
-            terminal.innerHTML += "You’ve found her... but at what cost?_<br>";
+            terminal.innerHTML += "You’ve found her... but at what cost?<br>";
             setTimeout(() => {
-                terminal.innerHTML += "Goodbye..._<br>";
-                startCountdown();
-            }, 2000);
+                terminal.innerHTML += "Goodbye...<br>";
+                setTimeout(() => {
+                    startCountdown();
+                }, 2000);
+            }, 1500);
         }
 
-        // Countdown Logic
         function startCountdown() {
             const countdownTarget = new Date("2025-01-01T00:00:00").getTime();
+            const countdownLine = document.createElement("div");
+            terminal.appendChild(countdownLine);
 
             function updateCountdown() {
                 const now = new Date().getTime();
@@ -128,19 +138,19 @@
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
                 if (distance < 0) {
-                    terminal.innerHTML += "Countdown: SHE'S HERE!_<br>";
+                    countdownLine.innerHTML = "Countdown: SHE'S HERE!";
                     return;
                 }
 
-                terminal.innerHTML += `Countdown: ${days}d ${hours}h ${minutes}m ${seconds}s_<br>`;
+                countdownLine.innerHTML = `Countdown: ${days}d ${hours}h ${minutes}m ${seconds}s`;
                 setTimeout(updateCountdown, 1000);
             }
 
             updateCountdown();
         }
 
-        // Start typing
-        startTypingSequence();
+        // Start the typing sequence
+        typeSequenceWithPauses();
     </script>
 </body>
 </html>
