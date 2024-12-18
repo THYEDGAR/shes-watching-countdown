@@ -47,7 +47,6 @@
         let userInput = "";
         let isTyping = false;
 
-        // Typing effect for automated messages
         async function typeLine(line, typingSpeed = 75) {
             isTyping = true;
             return new Promise(resolve => {
@@ -72,74 +71,76 @@
         }
 
         async function startTypingSequence() {
-    const lines = [
-        "Greetings, stranger...",
-        "It's been a while...",
-        "But it's also nice seeing you again...",
-        "I have something for you...",
-        "A riddle!",
-        "Pay close attention..."
-    ];
+            const lines = [
+                "Greetings, stranger...",
+                "It's been a while...",
+                "But it's also nice seeing you again...",
+                "I have something for you...",
+                "A riddle!",
+                "Pay close attention..."
+            ];
 
-    for (const line of lines) {
-        await typeLine(line);
-        await pause(1000);
-        terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '') + "<br>";
-        scrollToBottom();
-    }
+            for (const line of lines) {
+                await typeLine(line);
+                await pause(1000);
+                terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '') + "<br>";
+                scrollToBottom();
+            }
 
-    await typeLine('"I have no form but can take any shape."');
-    await pause(1000);
-    terminal.innerHTML += "<br>";
-    await typeLine('"I am neither light nor shadow, but I still escape."');
-    await pause(1000);
-    terminal.innerHTML += "<br>";
-    await typeLine('"I grow when you’re loud and fade when you’re still."');
-    await pause(1000);
-    terminal.innerHTML += "<br>";
-    await typeLine("What am I?");
-    await pause(1000);
-    terminal.innerHTML += "<br>";
-    startInput();
-} // This closing bracket was missing
+            await typeLine('"I have no form but can take any shape."');
+            await pause(1000);
+            terminal.innerHTML += "<br>";
+            await typeLine('"I am neither light nor shadow, but I still escape."');
+            await pause(1000);
+            terminal.innerHTML += "<br>";
+            await typeLine('"I grow when you’re loud and fade when you’re still."');
+            await pause(1000);
+            terminal.innerHTML += "<br>";
+            await typeLine("What am I?");
+            await pause(1000);
+            terminal.innerHTML += "<br>";
+            startInput();
+        }
 
-  function startInput() {
-    if (isTyping) return;
-    removeCursor();
-    clearInput();
+        function startInput() {
+            if (isTyping) return;
+            removeCursor();
+            clearInput();
 
-    terminal.innerHTML += `<div id="input-container"><span id="input-line"></span><span class="cursor"></span></div>`;
-    scrollToBottom();
+            terminal.innerHTML += `<div id="input-container">
+                                    <span id="input-line"></span>
+                                    <span class="cursor"></span>
+                                </div>`;
+            scrollToBottom();
 
-    hiddenInput.value = "";
-    hiddenInput.focus(); // Ensure hidden input gets focus
-    userInput = "";
+            hiddenInput.value = "";
+            hiddenInput.focus();
+            userInput = "";
 
-    // Enable focusing when tapping the cursor
-    const cursor = document.querySelector(".cursor");
-    cursor.addEventListener("click", () => {
-        hiddenInput.focus();
-        scrollToBottom();
-    });
+            const cursor = document.querySelector(".cursor");
+            cursor.addEventListener("click", () => {
+                hiddenInput.focus();
+                scrollToBottom();
+            });
 
-    hiddenInput.addEventListener("input", updateInput);
-    hiddenInput.addEventListener("keydown", handleInput);
-}
+            hiddenInput.oninput = updateInput;
+            hiddenInput.onkeydown = handleInput;
+        }
 
- function updateInput() {
-    if (isTyping) return; // Block typing during automated messages
-    const inputLine = document.getElementById("input-line");
-    userInput = hiddenInput.value; // Sync hidden input with visible line
-    inputLine.textContent = userInput;
-    scrollToBottom();
-}
+        function updateInput() {
+            if (isTyping) return;
+            const inputLine = document.getElementById("input-line");
+            userInput = hiddenInput.value;
+            inputLine.textContent = userInput;
+            scrollToBottom();
+        }
 
-function handleInput(event) {
-    if (isTyping) return; // Block all input while messages are typing
-    if (event.key === "Enter") {
-        processInput();
-    }
-}
+        function handleInput(event) {
+            if (isTyping) return;
+            if (event.key === "Enter") {
+                processInput();
+            }
+        }
 
         function processInput() {
             if (isTyping) return;
@@ -155,17 +156,16 @@ function handleInput(event) {
         }
 
         async function displayRetry() {
-    isTyping = true; // Block user input
-    await typeLine("Wrong answer...", 75);
-    await pause(1000);
-
-    terminal.innerHTML += "<br>";
-    await typeLine("Try again:", 75);
-    terminal.innerHTML += "<br>";
-    isTyping = false; // Re-enable input
-    startInput(); // Restart input on a clean line
-    scrollToBottom();
-}
+            isTyping = true;
+            await typeLine("Wrong answer...", 75);
+            await pause(1000);
+            terminal.innerHTML += "<br>";
+            await typeLine("Try again:", 75);
+            terminal.innerHTML += "<br>";
+            isTyping = false;
+            startInput();
+            scrollToBottom();
+        }
 
         async function displaySuccess() {
             isTyping = true;
@@ -206,15 +206,15 @@ function handleInput(event) {
             updateCountdown();
         }
 
-       function scrollToBottom() {
-    setTimeout(() => {
-        const inputContainer = document.getElementById("input-container");
-        if (inputContainer) {
-            const scrollPosition = inputContainer.offsetTop - window.innerHeight / 2; 
-            window.scrollTo({ top: scrollPosition, behavior: "smooth" });
+        function scrollToBottom() {
+            setTimeout(() => {
+                const inputContainer = document.getElementById("input-container");
+                if (inputContainer) {
+                    inputContainer.scrollIntoView({ behavior: "smooth", block: "center" });
+                }
+            }, 50);
         }
-    }, 50); // Slight delay to avoid conflict
-}
+
         function pause(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
