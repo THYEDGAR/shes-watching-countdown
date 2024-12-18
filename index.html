@@ -36,53 +36,48 @@
 
     <script>
         const terminal = document.getElementById("terminal");
-        const lines = [
-            "Greetings, stranger...",
-            "I have something for you...",
-            "A riddle: \"I have no voice, but I can still make you listen. What am I?\"",
-            "Type your answer and press Enter:"
-        ];
-
         const correctAnswer = "echo";
-        let inputMode = false; // Locks typing until ready
-        let userInput = ""; // Tracks user input
+        let inputMode = false;
+        let userInput = "";
 
-        // Typing effect with pauses
-        async function typeLine(line) {
+        async function typeLine(line, typingSpeed = 75) {
             return new Promise(resolve => {
                 let i = 0;
                 const cursor = '<span class="cursor"></span>';
                 const interval = setInterval(() => {
-                    terminal.innerHTML = terminal.innerHTML.replace(cursor, ""); // Remove old cursor
+                    terminal.innerHTML = terminal.innerHTML.replace(cursor, "");
                     terminal.innerHTML += line[i];
                     i++;
-                    terminal.innerHTML += cursor; // Append cursor again
-
+                    terminal.innerHTML += cursor;
                     if (i === line.length) {
                         clearInterval(interval);
                         resolve();
                     }
-                }, 75); // Typing speed
+                }, typingSpeed);
             });
         }
 
-        async function typeSequenceWithPauses() {
+        async function startTypingSequence() {
+            const lines = [
+                "Greetings, stranger...",
+                "I have something for you...",
+                "A riddle: \"I have no voice, but I can still make you listen. What am I?\"",
+                "Type your answer and press Enter:"
+            ];
+
             for (const line of lines) {
                 await typeLine(line);
-                await pause(1000); // Pause before moving to next line
-                terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '') + '<br>';
+                await pause(1000);
+                terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '') + "<br>";
             }
-            // Unlock input after the typing is done
-            startInput();
-        }
 
-        function pause(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
+            startInput();
         }
 
         function startInput() {
             inputMode = true;
-            terminal.innerHTML += `<span id="input-line"></span><span class="cursor"></span>`;
+            userInput = "";
+            terminal.innerHTML += `<div id="input-container"><span id="input-line"></span><span class="cursor"></span></div>`;
             document.addEventListener("keydown", handleInput);
         }
 
@@ -95,14 +90,12 @@
             if (event.key === "Enter") {
                 inputMode = false;
                 document.removeEventListener("keydown", handleInput);
-                if (userInput.toLowerCase().trim() === correctAnswer) {
+                const currentInput = userInput.toLowerCase().trim();
+                terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '');
+                if (currentInput === correctAnswer) {
                     displaySuccess();
                 } else {
-                    terminal.innerHTML += `<br>Wrong answer... Try again:<br>`;
-                    userInput = "";
-                    terminal.innerHTML += `<span id="input-line"></span><span class="cursor"></span>`;
-                    inputMode = true;
-                    document.addEventListener("keydown", handleInput);
+                    displayRetry();
                 }
             } else if (event.key === "Backspace") {
                 userInput = userInput.slice(0, -1);
@@ -110,47 +103,58 @@
                 userInput += event.key;
             }
 
-            inputLine.innerHTML = userInput;
+            inputLine.textContent = userInput;
         }
 
-        function displaySuccess() {
-            terminal.innerHTML += "You’ve found her... but at what cost?<br>";
-            setTimeout(() => {
-                terminal.innerHTML += "Goodbye...<br>";
-                setTimeout(() => {
-                    startCountdown();
-                }, 2000);
-            }, 1500);
+        async function displayRetry() {
+            terminal.innerHTML += "<br>";
+            await typeLine("Wrong answer... Try again:");
+            await pause(500);
+            startInput(); // Restart input on a new line
+        }
+
+        async function displaySuccess() {
+            terminal.innerHTML += "<br>";
+            await typeLine("You’ve found her... but at what cost?", 100);
+            await pause(1500);
+            await typeLine("Goodbye...", 150);
+            await pause(2000);
+            terminal.innerHTML += "<br>";
+            startCountdown();
         }
 
         function startCountdown() {
             const countdownTarget = new Date("2025-01-01T00:00:00").getTime();
-            const countdownLine = document.createElement("div");
-            terminal.appendChild(countdownLine);
+            const countdownContainer = document.createElement("div");
+            terminal.appendChild(countdownContainer);
 
             function updateCountdown() {
                 const now = new Date().getTime();
                 const distance = countdownTarget - now;
+
+                if (distance < 0) {
+                    countdownContainer.textContent = "Countdown: SHE'S HERE!";
+                    return;
+                }
 
                 const days = Math.floor(distance / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-                if (distance < 0) {
-                    countdownLine.innerHTML = "Countdown: SHE'S HERE!";
-                    return;
-                }
-
-                countdownLine.innerHTML = `Countdown: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+                countdownContainer.textContent = `Countdown: ${days}d ${hours}h ${minutes}m ${seconds}s`;
                 setTimeout(updateCountdown, 1000);
             }
 
             updateCountdown();
         }
 
+        function pause(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
         // Start the typing sequence
-        typeSequenceWithPauses();
+        startTypingSequence();
     </script>
 </body>
 </html>
