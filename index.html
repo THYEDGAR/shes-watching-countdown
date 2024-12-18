@@ -10,16 +10,20 @@
             color: #ec461c;
             font-family: 'Courier New', monospace;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             line-height: 1.5;
             white-space: pre-wrap;
             height: 100vh;
-            overflow: hidden; /* Disable manual scrolling */
+            overflow: hidden; /* Lock browser scrolling */
         }
         #terminal {
             font-size: 1.2em;
             height: 100%;
-            overflow-y: hidden; /* Prevent browser-based scrollbars */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end; /* Always lock content to bottom */
+            overflow-y: hidden; /* Prevent scrollbar */
+            padding: 20px;
         }
         .cursor {
             display: inline-block;
@@ -66,7 +70,7 @@
                     if (i === line.length) {
                         clearInterval(interval);
                         isTyping = false;
-                        scrollToInput(); // Scroll to ensure input stays visible
+                        lockToBottom();
                         resolve();
                     }
                 }, typingSpeed);
@@ -109,8 +113,8 @@
             removeCursor();
             clearInput();
             terminal.innerHTML += `<div id="input-container"><span id="input-line"></span><span class="cursor"></span></div>`;
+            lockToBottom();
             focusInput();
-            scrollToInput(); // Always center input field
         }
 
         function focusInput() {
@@ -120,7 +124,7 @@
             const cursor = document.querySelector(".cursor");
             cursor.addEventListener("click", () => {
                 hiddenInput.focus();
-                scrollToInput();
+                lockToBottom();
             });
 
             userInput = "";
@@ -130,11 +134,10 @@
 
         function updateInput(event) {
             if (isTyping) return;
-            event.preventDefault(); // Stop any unintended scrolling
             const inputLine = document.getElementById("input-line");
             userInput = hiddenInput.value;
             inputLine.textContent = userInput;
-            scrollToInput();
+            lockToBottom();
         }
 
         function handleInput(event) {
@@ -177,13 +180,8 @@
             terminal.innerHTML += "<br>";
         }
 
-        function scrollToInput() {
-            setTimeout(() => {
-                const inputContainer = document.getElementById("input-container");
-                if (inputContainer) {
-                    inputContainer.scrollIntoView({ behavior: "smooth", block: "center" });
-                }
-            }, 10); // Slight delay ensures proper positioning
+        function lockToBottom() {
+            terminal.scrollTop = terminal.scrollHeight;
         }
 
         function pause(ms) {
