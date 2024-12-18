@@ -64,7 +64,7 @@
                     if (i === line.length) {
                         clearInterval(interval);
                         isTyping = false;
-                        scrollToInput();
+                        scrollToInput(true); // Scroll only after typing finishes
                         resolve();
                     }
                 }, typingSpeed);
@@ -107,16 +107,14 @@
             removeCursor();
             clearInput();
             terminal.innerHTML += `<div id="input-container"><span id="input-line"></span><span class="cursor"></span></div>`;
-            scrollToInput();
             focusInput();
+            scrollToInput(true); // Scroll when input starts
         }
 
         function focusInput() {
             hiddenInput.value = "";
             hiddenInput.focus();
             const cursor = document.querySelector(".cursor");
-
-            // Ensure focus on tap (mobile fix)
             cursor.addEventListener("click", () => {
                 hiddenInput.focus();
             });
@@ -131,16 +129,15 @@
             const inputLine = document.getElementById("input-line");
             userInput = hiddenInput.value;
             inputLine.textContent = userInput;
-            scrollToInput();
         }
 
         function handleInput(event) {
-            if (isTyping) return; // Prevent input during automated messages
+            if (isTyping) return;
             if (event.key === "Enter") processInput();
         }
 
         function processInput() {
-            if (isTyping) return; // Block Enter during automated messages
+            if (isTyping) return;
             removeCursor();
             const currentInput = userInput.toLowerCase().trim();
             terminal.innerHTML += "<br>";
@@ -153,7 +150,7 @@
         }
 
         async function displayRetry() {
-            isTyping = true; // Prevent typing during retry message
+            isTyping = true;
             await typeLine("Wrong answer...", 75);
             await pause(1000);
             terminal.innerHTML += "<br>";
@@ -174,10 +171,13 @@
             terminal.innerHTML += "<br>";
         }
 
-        function scrollToInput() {
+        function scrollToInput(force = false) {
             setTimeout(() => {
                 const inputContainer = document.getElementById("input-container");
-                if (inputContainer) {
+                const rect = inputContainer?.getBoundingClientRect();
+
+                // Only scroll if the input container is outside the view or forced
+                if (force || rect.bottom > window.innerHeight || rect.top < 0) {
                     inputContainer.scrollIntoView({ behavior: "smooth", block: "center" });
                 }
             }, 50);
