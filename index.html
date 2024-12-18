@@ -110,17 +110,19 @@
 
         async function displayRetry() {
     clearInput(); // Remove old input box
-    removeCursor(); // Ensure the cursor is removed completely
-    
-    // Type "Wrong answer..." with a subtle pause
-    terminal.innerHTML += "<br>"; // Move to a new line
+    removeCursor(); // Ensure lingering cursors are removed
+
+    // Add retry messages on clean lines
+    terminal.innerHTML += "<br>";
     await typeLine("Wrong answer...", 75);
     await pause(1000);
-    terminal.innerHTML += "<br>"; // Start "Try again" on a new line
+
+    terminal.innerHTML += "<br>"; // New line for "Try again:"
     await typeLine("Try again:", 75);
-    
-    // Restart the input on a clean new line
+
+    // Start new input on a clean line
     terminal.innerHTML += "<br>";
+    removeCursor(); // Double-check to clear any lingering cursor
     startInput();
 }
 
@@ -169,9 +171,8 @@
         }
 
         function removeCursor() {
-            const cursor = document.querySelector(".cursor");
-            if (cursor) cursor.remove();
-        }
+    document.querySelectorAll(".cursor").forEach(cursor => cursor.remove());
+}
 
         function clearInput() {
             const oldInput = document.getElementById("input-container");
