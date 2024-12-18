@@ -45,13 +45,15 @@
                 let i = 0;
                 const cursor = '<span class="cursor"></span>';
                 removeCursor();
+
                 const interval = setInterval(() => {
                     terminal.innerHTML = terminal.innerHTML.replace(cursor, "");
                     terminal.innerHTML += line[i];
                     i++;
-                    terminal.innerHTML += cursor;
+
                     if (i === line.length) {
                         clearInterval(interval);
+                        terminal.innerHTML += cursor;
                         resolve();
                     }
                 }, typingSpeed);
@@ -83,54 +85,60 @@
         }
 
         function startInput() {
-    removeCursor(); // Remove all cursors globally
-    clearInput();   // Remove old input container
+            removeCursor(); // Remove all cursors globally
+            clearInput();   // Remove any previous input container
 
-    // Add fresh input container with a single cursor
-    terminal.innerHTML += `<div id="input-container"><span id="input-line"></span><span class="cursor"></span></div>`;
-    userInput = ""; // Reset input
-    document.addEventListener("keydown", handleInput);
-}
+            // Force a visible new input line
+            const inputContainer = `<div id="input-container">
+                                        <span id="input-line"></span>
+                                        <span class="cursor"></span>
+                                    </div>`;
+            terminal.innerHTML += inputContainer;
+
+            userInput = ""; // Reset input text
+            document.addEventListener("keydown", handleInput);
+        }
 
         function handleInput(event) {
-    const inputLine = document.getElementById("input-line");
-    if (event.key === "Enter") {
-        removeCursor(); // Clear all cursors before processing input
-        document.removeEventListener("keydown", handleInput);
-        clearInput(); // Clear the input container
+            const inputLine = document.getElementById("input-line");
+            if (event.key === "Enter") {
+                removeCursor(); // Clear all cursors before processing input
+                document.removeEventListener("keydown", handleInput);
+                clearInput(); // Clear the input container
 
-        const currentInput = userInput.toLowerCase().trim();
+                const currentInput = userInput.toLowerCase().trim();
 
-        if (correctAnswer.includes(currentInput)) {
-            displaySuccess();
-        } else {
-            displayRetry();
+                if (correctAnswer.includes(currentInput)) {
+                    displaySuccess();
+                } else {
+                    displayRetry();
+                }
+            } else if (event.key === "Backspace") {
+                userInput = userInput.slice(0, -1);
+            } else if (event.key.length === 1) {
+                userInput += event.key;
+            }
+            inputLine.textContent = userInput;
         }
-    } else if (event.key === "Backspace") {
-        userInput = userInput.slice(0, -1);
-    } else if (event.key.length === 1) {
-        userInput += event.key;
-    }
-    inputLine.textContent = userInput;
-}
 
         async function displayRetry() {
-    removeCursor(); // Forcefully remove all existing cursors
-    clearInput(); // Clear the old input box
+            removeCursor(); // Forcefully remove all existing cursors
+            clearInput(); // Clear the old input box
 
-    // Add retry messages on clean lines
-    terminal.innerHTML += "<br>"; // Move to a new line
-    await typeLine("Wrong answer...", 75);
-    await pause(1000);
+            // Add retry messages on clean lines
+            terminal.innerHTML += "<br>"; // Move to a new line
+            await typeLine("Wrong answer...", 75);
 
-    terminal.innerHTML += "<br>"; // New line for "Try again:"
-    await typeLine("Try again.", 75);
+            await pause(1000);
 
-    // Restart the input cleanly
-    terminal.innerHTML += "<br>";
-    removeCursor(); // Double-check to ensure no lingering cursor exists
-    startInput();
-}
+            terminal.innerHTML += "<br>"; // New line for "Try again:"
+            await typeLine("Try again.", 75);
+
+            // Restart the input cleanly
+            terminal.innerHTML += "<br>";
+            startInput();
+        }
+
         async function displaySuccess() {
             clearInput();
             await typeLine("You’ve found her...", 100);
@@ -176,8 +184,8 @@
         }
 
         function removeCursor() {
-    document.querySelectorAll(".cursor").forEach(cursor => cursor.remove());
-}
+            document.querySelectorAll(".cursor").forEach(cursor => cursor.remove());
+        }
 
         function clearInput() {
             const oldInput = document.getElementById("input-container");
