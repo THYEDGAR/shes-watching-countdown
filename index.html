@@ -109,13 +109,20 @@
         }
 
         async function displayRetry() {
-            clearInput(); // Remove old input line
-            await typeLine("Wrong answer...", 75);
-            await pause(1000); // Subtle pause
-            await typeLine(" Try again:", 75);
-            terminal.innerHTML += "<br>";
-            startInput();
-        }
+    clearInput(); // Remove old input box
+    removeCursor(); // Ensure the cursor is removed completely
+    
+    // Type "Wrong answer..." with a subtle pause
+    terminal.innerHTML += "<br>"; // Move to a new line
+    await typeLine("Wrong answer...", 75);
+    await pause(1000);
+    terminal.innerHTML += "<br>"; // Start "Try again" on a new line
+    await typeLine("Try again:", 75);
+    
+    // Restart the input on a clean new line
+    terminal.innerHTML += "<br>";
+    startInput();
+}
 
         async function displaySuccess() {
             clearInput();
