@@ -5,151 +5,142 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>She's Watching</title>
     <style>
-        /* Base Styles */
+        /* Base Terminal Style */
         body {
             background-color: #000;
             color: #ec461c;
             font-family: 'Courier New', monospace;
-            text-align: center;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+            white-space: pre-wrap; /* Keeps line breaks */
         }
-        h1 {
-            font-size: 3em;
-            text-shadow: 0 0 5px #ec461c, 0 0 10px #ff4500;
-            animation: glitch 1.5s infinite alternate;
-        }
-        p {
-            margin-top: 10px;
+        #terminal {
             font-size: 1.2em;
         }
-        #countdown {
-            font-size: 2em;
-            margin-bottom: 30px;
-            text-shadow: 0 0 5px #ff4500;
-        }
-        #riddle-container {
-            margin-top: 20px;
-            animation: flicker 2s infinite alternate;
-        }
-        input {
-            padding: 10px;
-            font-size: 1em;
-            border: 1px solid #ff4500;
-            background: #000;
-            color: #ec461c;
-            text-align: center;
-            text-shadow: 0 0 5px #ec461c;
-        }
-        button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            font-size: 1em;
-            color: #000;
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.2em;
             background-color: #ec461c;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            animation: blink 0.7s steps(2, start) infinite;
         }
-        button:hover {
-            box-shadow: 0 0 10px #ff4500;
-        }
-        #reward-message {
-            margin-top: 20px;
-            font-size: 1.5em;
-            color: #ff7f50;
-            text-shadow: 0 0 10px #ff7f50, 0 0 20px #ec461c;
-            display: none;
-            animation: glow 2s infinite alternate;
-        }
-
-        /* Animations */
-        @keyframes glitch {
-            0% {
-                text-shadow: 2px 2px #ec461c, -2px -2px #ff4500;
-            }
-            50% {
-                text-shadow: -2px 0px #ff4500, 2px 2px #ec461c;
-            }
-            100% {
-                text-shadow: 0px 2px #ec461c, -2px -2px #ff4500;
-            }
-        }
-        @keyframes flicker {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.8;
-            }
-        }
-        @keyframes glow {
-            0% {
-                text-shadow: 0 0 10px #ff7f50, 0 0 20px #ec461c;
-            }
-            50% {
-                text-shadow: 0 0 20px #ff7f50, 0 0 30px #ec461c;
-            }
-            100% {
-                text-shadow: 0 0 10px #ff7f50, 0 0 20px #ec461c;
-            }
+        @keyframes blink {
+            50% { opacity: 0; }
         }
     </style>
 </head>
 <body>
-    <h1>SHE'S WATCHING</h1>
-    <p>Time until the truth reveals itself:</p>
-    <div id="countdown">Loading...</div>
-
-    <!-- Riddle Section -->
-    <div id="riddle-container">
-        <p>Answer the riddle to uncover her secret:</p>
-        <p><em>"I have no voice, but I can still make you listen. What am I?"</em></p>
-        <input type="text" id="riddle-input" placeholder="Enter your answer...">
-        <button id="submit-btn">Submit</button>
-        <div id="reward-message">You’ve found her... but at what cost?</div>
-    </div>
+    <div id="terminal"></div>
 
     <script>
-        // Countdown Timer Logic
-        const countdownElement = document.getElementById('countdown');
-        const targetDate = new Date("2025-01-01T00:00:00").getTime();
+        const terminal = document.getElementById("terminal");
+        const lines = [
+            "Greetings, stranger..._", 
+            "I have something for you..._", 
+            "A riddle: \"I have no voice, but I can still make you listen. What am I?\"_", 
+            "Type your answer and press Enter:_"
+        ];
+        
+        const correctAnswer = "echo"; // Riddle answer
+        let inputMode = false; // Tracks if user is typing
+        let userInput = ""; // Tracks user input
 
-        function updateCountdown() {
-            const now = new Date().getTime();
-            const distance = targetDate - now;
-
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            countdownElement.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-
-            if (distance < 0) {
-                countdownElement.textContent = "She's here...";
-            }
+        // Typing effect
+        function typeLine(line, callback) {
+            let i = 0;
+            const interval = setInterval(() => {
+                terminal.innerHTML += line[i];
+                i++;
+                if (i === line.length) {
+                    clearInterval(interval);
+                    terminal.innerHTML += "<br>"; // Move to the next line
+                    callback();
+                }
+            }, 50); // Typing speed
         }
-        setInterval(updateCountdown, 1000);
 
-        // Riddle Logic
-        const correctAnswer = "echo"; // The correct answer
-        const inputField = document.getElementById("riddle-input");
-        const submitBtn = document.getElementById("submit-btn");
-        const rewardMessage = document.getElementById("reward-message");
+        // Start the typing sequence
+        function startTypingSequence() {
+            let lineIndex = 0;
 
-        submitBtn.addEventListener("click", () => {
-            const userAnswer = inputField.value.trim().toLowerCase();
-            if (userAnswer === correctAnswer) {
-                rewardMessage.style.display = "block"; // Reveal hidden message
-            } else {
-                alert("That's not the right answer... She's still watching.");
+            function nextLine() {
+                if (lineIndex < lines.length) {
+                    typeLine(lines[lineIndex], nextLine);
+                    lineIndex++;
+                } else {
+                    // After typing the last prompt, allow user input
+                    inputMode = true;
+                    terminal.innerHTML += `<span id="input-line"></span><span class="cursor"></span>`;
+                    document.addEventListener("keydown", handleInput);
+                }
             }
-        });
+
+            nextLine();
+        }
+
+        // Handle user input
+        function handleInput(event) {
+            if (!inputMode) return;
+
+            const inputLine = document.getElementById("input-line");
+            const cursor = document.querySelector(".cursor");
+
+            if (event.key === "Enter") {
+                if (userInput.toLowerCase().trim() === correctAnswer) {
+                    displaySuccess();
+                } else {
+                    terminal.innerHTML += `\nWrong answer... Try again:_<br>`;
+                    userInput = "";
+                    inputLine.innerHTML = "";
+                }
+            } else if (event.key === "Backspace") {
+                userInput = userInput.slice(0, -1);
+            } else if (event.key.length === 1) {
+                userInput += event.key;
+            }
+
+            inputLine.innerHTML = userInput;
+        }
+
+        // Success message with countdown
+        function displaySuccess() {
+            inputMode = false;
+            document.removeEventListener("keydown", handleInput);
+            terminal.innerHTML += "You’ve found her... but at what cost?_<br>";
+            setTimeout(() => {
+                terminal.innerHTML += "Goodbye..._<br>";
+                startCountdown();
+            }, 2000);
+        }
+
+        // Countdown Logic
+        function startCountdown() {
+            const countdownTarget = new Date("2025-01-01T00:00:00").getTime();
+
+            function updateCountdown() {
+                const now = new Date().getTime();
+                const distance = countdownTarget - now;
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                if (distance < 0) {
+                    terminal.innerHTML += "Countdown: SHE'S HERE!_<br>";
+                    return;
+                }
+
+                terminal.innerHTML += `Countdown: ${days}d ${hours}h ${minutes}m ${seconds}s_<br>`;
+                setTimeout(updateCountdown, 1000);
+            }
+
+            updateCountdown();
+        }
+
+        // Start typing
+        startTypingSequence();
     </script>
 </body>
 </html>
