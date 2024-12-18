@@ -21,8 +21,7 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end; /* Always lock content to bottom */
-            overflow-y: hidden; /* Prevent scrollbar */
+            justify-content: flex-end; /* Input stays at the bottom */
             padding: 20px;
         }
         .cursor {
@@ -56,25 +55,14 @@
         // Typing effect for automated messages
         async function typeLine(line, typingSpeed = 75) {
             isTyping = true;
-            return new Promise(resolve => {
-                let i = 0;
-                const cursor = '<span class="cursor"></span>';
-                removeCursor();
-
-                const interval = setInterval(() => {
-                    terminal.innerHTML = terminal.innerHTML.replace(cursor, "");
-                    terminal.innerHTML += line[i];
-                    i++;
-                    terminal.innerHTML += cursor;
-
-                    if (i === line.length) {
-                        clearInterval(interval);
-                        isTyping = false;
-                        lockToBottom();
-                        resolve();
-                    }
-                }, typingSpeed);
-            });
+            const cursor = '<span class="cursor"></span>';
+            let output = "";
+            for (let i = 0; i < line.length; i++) {
+                output += line[i];
+                terminal.lastChild.innerHTML = output + cursor;
+                await pause(typingSpeed);
+            }
+            isTyping = false;
         }
 
         async function startTypingSequence() {
@@ -88,115 +76,99 @@
             ];
 
             for (const line of lines) {
-                await typeLine(line);
+                const div = document.createElement("div");
+                div.innerHTML = `<span>${line}</span>`;
+                terminal.appendChild(div);
                 await pause(1000);
-                terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '') + "<br>";
             }
 
-            await typeLine('"I have no form but can take any shape."');
-            await pause(1000);
-            terminal.innerHTML += "<br>";
-            await typeLine('"I am neither light nor shadow, but I still escape."');
-            await pause(1000);
-            terminal.innerHTML += "<br>";
-            await typeLine('"I grow when you’re loud and fade when you’re still."');
-            await pause(1000);
-            terminal.innerHTML += "<br>";
-            await typeLine("What am I?");
-            await pause(1000);
-            terminal.innerHTML += "<br>";
+            await displayRiddle();
             startInput();
+        }
+
+        async function displayRiddle() {
+            const riddle = [
+                '"I have no form but can take any shape."',
+                '"I am neither light nor shadow, but I still escape."',
+                '"I grow when you’re loud and fade when you’re still."',
+                "What am I?"
+            ];
+
+            for (const line of riddle) {
+                const div = document.createElement("div");
+                div.innerHTML = `<span>${line}</span>`;
+                terminal.appendChild(div);
+                await pause(1000);
+            }
         }
 
         function startInput() {
             if (isTyping) return;
-            removeCursor();
-            clearInput();
-            terminal.innerHTML += `<div id="input-container"><span id="input-line"></span><span class="cursor"></span></div>`;
-            lockToBottom();
-            focusInput();
-        }
-
-        function focusInput() {
+            const inputLine = document.createElement("div");
+            inputLine.id = "input-container";
+            inputLine.innerHTML = `<span id="input-line"></span><span class="cursor"></span>`;
+            terminal.appendChild(inputLine);
             hiddenInput.value = "";
             hiddenInput.focus();
-
-            const cursor = document.querySelector(".cursor");
-            cursor.addEventListener("click", () => {
-                hiddenInput.focus();
-                lockToBottom();
-            });
-
             userInput = "";
+
             hiddenInput.oninput = updateInput;
             hiddenInput.onkeydown = handleInput;
         }
 
-        function updateInput(event) {
+        function updateInput() {
             if (isTyping) return;
             const inputLine = document.getElementById("input-line");
             userInput = hiddenInput.value;
             inputLine.textContent = userInput;
-            lockToBottom();
         }
 
-        function handleInput(event) {
+        async function handleInput(event) {
             if (isTyping) return;
-            if (event.key === "Enter") processInput();
-        }
-
-        function processInput() {
-            if (isTyping) return;
-            removeCursor();
-            const currentInput = userInput.toLowerCase().trim();
-            terminal.innerHTML += "<br>";
-
-            if (correctAnswer.includes(currentInput)) {
-                displaySuccess();
-            } else {
-                displayRetry();
+            if (event.key === "Enter") {
+                processInput();
             }
         }
 
-        async function displayRetry() {
+        async function processInput() {
+            if (isTyping) return;
             isTyping = true;
-            await typeLine("Wrong answer...", 75);
-            await pause(1000);
-            terminal.innerHTML += "<br>";
-            await typeLine("Try again:");
-            terminal.innerHTML += "<br>";
+
+            const currentInput = userInput.toLowerCase().trim();
+            const inputLine = document.getElementById("input-container");
+
+            if (correctAnswer.includes(currentInput)) {
+                inputLine.innerHTML = `<span id="input-line">You’ve found her...</span>`;
+                await pause(1000);
+                await typeLine(" but at what cost?");
+                await pause(2000);
+                inputLine.innerHTML += "<br>Goodbye...";
+            } else {
+                await displayRetry(inputLine);
+            }
+
             isTyping = false;
-            startInput();
         }
 
-        async function displaySuccess() {
-            isTyping = true;
-            await typeLine("You’ve found her...", 100);
+        async function displayRetry(inputLine) {
+            await typeLine(" Wrong answer...", 75);
             await pause(1000);
-            await typeLine(" but at what cost?", 150);
-            await pause(2000);
-            terminal.innerHTML += "<br>";
-            await typeLine("Goodbye...", 150);
-            terminal.innerHTML += "<br>";
+            await deleteText(inputLine);
+            await typeLine("Try again: ", 75);
+            hiddenInput.value = "";
+            userInput = "";
         }
 
-        function lockToBottom() {
-            terminal.scrollTop = terminal.scrollHeight;
+        async function deleteText(inputLine) {
+            let text = userInput;
+            for (let i = text.length; i >= 0; i--) {
+                inputLine.innerHTML = `<span id="input-line">${text.slice(0, i)}</span><span class="cursor"></span>`;
+                await pause(50);
+            }
         }
 
         function pause(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
-        function removeCursor() {
-            document.querySelectorAll(".cursor").forEach(cursor => cursor.remove());
-        }
-
-        function clearInput() {
-            const oldInput = document.getElementById("input-container");
-            if (oldInput) oldInput.remove();
-            hiddenInput.value = "";
-            userInput = "";
         }
 
         startTypingSequence();
