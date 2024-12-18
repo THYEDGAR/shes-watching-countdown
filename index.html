@@ -108,8 +108,16 @@
             clearInput();
             terminal.innerHTML += `<div id="input-container"><span id="input-line"></span><span class="cursor"></span></div>`;
             scrollToInput();
+            focusInput();
+        }
+
+        function focusInput() {
             hiddenInput.value = "";
             hiddenInput.focus();
+            const cursor = document.querySelector(".cursor");
+            cursor.addEventListener("click", () => {
+                hiddenInput.focus();
+            });
             userInput = "";
 
             hiddenInput.oninput = updateInput;
@@ -162,33 +170,6 @@
             terminal.innerHTML += "<br>";
             await typeLine("Goodbye...", 150);
             terminal.innerHTML += "<br>";
-            startCountdown();
-        }
-
-        function startCountdown() {
-            const countdownTarget = new Date("2025-01-01T00:00:00").getTime();
-            const countdownLine = document.createElement("div");
-            terminal.appendChild(countdownLine);
-
-            function updateCountdown() {
-                const now = new Date().getTime();
-                const distance = countdownTarget - now;
-
-                if (distance < 0) {
-                    countdownLine.textContent = "SHE'S HERE!";
-                    return;
-                }
-
-                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                countdownLine.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-                setTimeout(updateCountdown, 1000);
-            }
-
-            updateCountdown();
         }
 
         function scrollToInput() {
