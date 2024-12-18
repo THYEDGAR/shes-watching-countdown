@@ -46,9 +46,11 @@
         const hiddenInput = document.getElementById("hidden-input");
         const correctAnswer = ["echo", "an echo"];
         let userInput = "";
+        let isTyping = false; // Prevents input during automated typing
 
         // Typing effect for automated text
         async function typeLine(line, typingSpeed = 75) {
+            isTyping = true; // Disable user input
             return new Promise(resolve => {
                 let i = 0;
                 const cursor = '<span class="cursor"></span>';
@@ -62,6 +64,7 @@
 
                     if (i === line.length) {
                         clearInterval(interval);
+                        isTyping = false; // Re-enable user input
                         resolve();
                     }
                 }, typingSpeed);
@@ -96,30 +99,36 @@
             removeCursor();
             clearInput();
             terminal.innerHTML += `<div id="input-container"><span id="input-line"></span><span class="cursor"></span></div>`;
+            scrollToInput();
             hiddenInput.focus();
             hiddenInput.value = "";
             userInput = "";
 
             const cursor = document.querySelector(".cursor");
-            cursor.addEventListener("click", () => hiddenInput.focus());
+            cursor.addEventListener("click", () => {
+                hiddenInput.focus();
+                scrollToInput();
+            });
 
             hiddenInput.addEventListener("input", updateInput);
             hiddenInput.addEventListener("keydown", handleInput);
         }
 
         function updateInput() {
+            if (isTyping) return; // Ignore input during automated messages
             const inputLine = document.getElementById("input-line");
             userInput = hiddenInput.value;
             inputLine.textContent = userInput;
+            scrollToInput();
         }
 
         function handleInput(event) {
-            if (event.key === "Enter") {
-                processInput();
-            }
+            if (isTyping) return; // Block "Enter" if typing
+            if (event.key === "Enter") processInput();
         }
 
         function processInput() {
+            if (isTyping) return; // Ignore input if automated typing is active
             removeCursor();
             const currentInput = userInput.toLowerCase().trim();
             terminal.innerHTML += "<br>";
@@ -132,19 +141,22 @@
         }
 
         async function displayRetry() {
+            isTyping = true;
             await typeLine("Wrong answer...", 75);
             await pause(1000);
             terminal.innerHTML += "<br>";
             await typeLine("Try again:");
             terminal.innerHTML += "<br>";
+            isTyping = false;
             startInput();
         }
 
         async function displaySuccess() {
+            isTyping = true;
             await typeLine("You’ve found her...", 100);
             await pause(1000);
             await typeLine(" but at what cost?", 150);
-            await pause(2000); // Subtle pause
+            await pause(2000);
             terminal.innerHTML += "<br>";
             await typeLine("Goodbye...", 150);
             terminal.innerHTML += "<br>";
@@ -175,6 +187,13 @@
             }
 
             updateCountdown();
+        }
+
+        function scrollToInput() {
+            const inputContainer = document.getElementById("input-container");
+            if (inputContainer) {
+                inputContainer.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
         }
 
         function pause(ms) {
