@@ -18,6 +18,8 @@
         }
         #terminal {
             font-size: 1.2em;
+            height: 90vh; /* Prevents content cutoff */
+            overflow-y: auto; /* Enable scrolling if necessary */
         }
         .cursor {
             display: inline-block;
@@ -25,14 +27,14 @@
             height: 1.2em;
             background-color: #ec461c;
             animation: blink 0.7s steps(2, start) infinite;
-            cursor: pointer; /* Makes the cursor tappable */
+            cursor: pointer;
         }
         @keyframes blink {
             50% { opacity: 0; }
         }
         input {
             position: absolute;
-            top: -9999px; /* Hides the input field off-screen */
+            top: -9999px; /* Hide input off-screen */
             opacity: 0;
         }
     </style>
@@ -43,7 +45,7 @@
 
     <script>
         const terminal = document.getElementById("terminal");
-        const hiddenInput = document.getElementById("hidden-input"); // Hidden input field
+        const hiddenInput = document.getElementById("hidden-input");
         const correctAnswer = ["echo", "an echo"]; // Accept multiple correct answers
         let userInput = "";
         let inputAllowed = false;
@@ -80,7 +82,7 @@
             ];
 
             for (const line of lines) {
-                inputAllowed = false; // Prevent input during automated messages
+                inputAllowed = false;
                 await typeLine(line);
                 await pause(1000);
                 terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '') + "<br>";
@@ -97,17 +99,17 @@
             removeCursor();
             clearInput();
 
-            const inputContainer = `<div id="input-container">
-                                        <span id="input-line"></span>
-                                        <span class="cursor"></span>
-                                    </div>`;
-            terminal.innerHTML += inputContainer;
+            terminal.innerHTML += `<div id="input-container">
+                                       <span id="input-line"></span>
+                                       <span class="cursor"></span>
+                                   </div>`;
 
-            const cursor = document.querySelector(".cursor");
-            cursor.addEventListener("click", () => hiddenInput.focus()); // Focus hidden input
-
-            hiddenInput.focus(); // Automatically focus on hidden input
+            hiddenInput.focus(); // Automatically focus hidden input
             inputAllowed = true;
+
+            // Add click listener to cursor
+            const cursor = document.querySelector(".cursor");
+            cursor.addEventListener("click", () => hiddenInput.focus());
 
             hiddenInput.addEventListener("input", updateInput);
             hiddenInput.addEventListener("keydown", handleInput);
@@ -121,13 +123,13 @@
 
         function handleInput(event) {
             if (event.key === "Enter" && inputAllowed) {
-                hiddenInput.blur(); // Remove focus from hidden input
+                hiddenInput.blur();
                 processInput();
             }
         }
 
         function processInput() {
-            inputAllowed = false; // Prevent additional input
+            inputAllowed = false;
             const currentInput = userInput.toLowerCase().trim();
             clearInput();
 
@@ -151,8 +153,38 @@
             await typeLine("You’ve found her...", 100);
             await pause(1000);
             await typeLine(" but at what cost?", 150);
+            await pause(1500);
             terminal.innerHTML += "<br>";
             await typeLine("Goodbye...", 150);
+            await pause(2000);
+            terminal.innerHTML += "<br>";
+            startCountdown();
+        }
+
+        function startCountdown() {
+            const countdownTarget = new Date("2025-01-01T00:00:00").getTime();
+            const countdownLine = document.createElement("div");
+            terminal.appendChild(countdownLine);
+
+            function updateCountdown() {
+                const now = new Date().getTime();
+                const distance = countdownTarget - now;
+
+                if (distance < 0) {
+                    countdownLine.textContent = "SHE'S HERE!";
+                    return;
+                }
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                countdownLine.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+                setTimeout(updateCountdown, 1000);
+            }
+
+            updateCountdown();
         }
 
         function pause(ms) {
@@ -166,7 +198,7 @@
         function clearInput() {
             const oldInput = document.getElementById("input-container");
             if (oldInput) oldInput.remove();
-            hiddenInput.value = ""; // Reset hidden input field
+            hiddenInput.value = ""; // Reset hidden input
             userInput = "";
         }
 
