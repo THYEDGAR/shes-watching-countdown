@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>She's Watching</title>
     <style>
+        /* Base Styles */
         body {
             background-color: #000;
             color: #ec461c;
@@ -15,15 +16,87 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            overflow: hidden;
         }
         h1 {
             font-size: 3em;
             text-shadow: 0 0 5px #ec461c, 0 0 10px #ff4500;
+            animation: glitch 1.5s infinite alternate;
+        }
+        p {
+            margin-top: 10px;
+            font-size: 1.2em;
         }
         #countdown {
             font-size: 2em;
-            margin-top: 20px;
+            margin-bottom: 30px;
             text-shadow: 0 0 5px #ff4500;
+        }
+        #riddle-container {
+            margin-top: 20px;
+            animation: flicker 2s infinite alternate;
+        }
+        input {
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ff4500;
+            background: #000;
+            color: #ec461c;
+            text-align: center;
+            text-shadow: 0 0 5px #ec461c;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 1em;
+            color: #000;
+            background-color: #ec461c;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            box-shadow: 0 0 10px #ff4500;
+        }
+        #reward-message {
+            margin-top: 20px;
+            font-size: 1.5em;
+            color: #ff7f50;
+            text-shadow: 0 0 10px #ff7f50, 0 0 20px #ec461c;
+            display: none;
+            animation: glow 2s infinite alternate;
+        }
+
+        /* Animations */
+        @keyframes glitch {
+            0% {
+                text-shadow: 2px 2px #ec461c, -2px -2px #ff4500;
+            }
+            50% {
+                text-shadow: -2px 0px #ff4500, 2px 2px #ec461c;
+            }
+            100% {
+                text-shadow: 0px 2px #ec461c, -2px -2px #ff4500;
+            }
+        }
+        @keyframes flicker {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.8;
+            }
+        }
+        @keyframes glow {
+            0% {
+                text-shadow: 0 0 10px #ff7f50, 0 0 20px #ec461c;
+            }
+            50% {
+                text-shadow: 0 0 20px #ff7f50, 0 0 30px #ec461c;
+            }
+            100% {
+                text-shadow: 0 0 10px #ff7f50, 0 0 20px #ec461c;
+            }
         }
     </style>
 </head>
@@ -32,10 +105,19 @@
     <p>Time until the truth reveals itself:</p>
     <div id="countdown">Loading...</div>
 
+    <!-- Riddle Section -->
+    <div id="riddle-container">
+        <p>Answer the riddle to uncover her secret:</p>
+        <p><em>"I have no voice, but I can still make you listen. What am I?"</em></p>
+        <input type="text" id="riddle-input" placeholder="Enter your answer...">
+        <button id="submit-btn">Submit</button>
+        <div id="reward-message">You’ve found her... but at what cost?</div>
+    </div>
+
     <script>
         // Countdown Timer Logic
         const countdownElement = document.getElementById('countdown');
-        const targetDate = new Date("2025-01-01T00:00:00").getTime(); // Reveal Date
+        const targetDate = new Date("2025-01-01T00:00:00").getTime();
 
         function updateCountdown() {
             const now = new Date().getTime();
@@ -52,8 +134,22 @@
                 countdownElement.textContent = "She's here...";
             }
         }
-
         setInterval(updateCountdown, 1000);
+
+        // Riddle Logic
+        const correctAnswer = "echo"; // The correct answer
+        const inputField = document.getElementById("riddle-input");
+        const submitBtn = document.getElementById("submit-btn");
+        const rewardMessage = document.getElementById("reward-message");
+
+        submitBtn.addEventListener("click", () => {
+            const userAnswer = inputField.value.trim().toLowerCase();
+            if (userAnswer === correctAnswer) {
+                rewardMessage.style.display = "block"; // Reveal hidden message
+            } else {
+                alert("That's not the right answer... She's still watching.");
+            }
+        });
     </script>
 </body>
 </html>
