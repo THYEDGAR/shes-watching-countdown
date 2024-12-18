@@ -13,11 +13,12 @@
             padding: 20px;
             line-height: 1.5;
             white-space: pre-wrap;
-            overflow-y: auto;
+            overflow: hidden; /* Disable user scrolling */
             height: 100vh;
         }
         #terminal {
             font-size: 1.2em;
+            overflow: hidden;
         }
         .cursor {
             display: inline-block;
@@ -25,14 +26,13 @@
             height: 1.2em;
             background-color: #ec461c;
             animation: blink 0.7s steps(2, start) infinite;
-            cursor: pointer;
         }
         @keyframes blink {
             50% { opacity: 0; }
         }
         input {
             position: absolute;
-            top: -9999px;
+            top: -9999px; /* Hidden input for capturing keyboard events */
             opacity: 0;
         }
     </style>
@@ -46,11 +46,11 @@
         const hiddenInput = document.getElementById("hidden-input");
         const correctAnswer = ["echo", "an echo"];
         let userInput = "";
-        let isTyping = false; // Prevents input during automated typing
+        let isTyping = false;
 
         // Typing effect for automated text
         async function typeLine(line, typingSpeed = 75) {
-            isTyping = true; // Disable user input
+            isTyping = true;
             return new Promise(resolve => {
                 let i = 0;
                 const cursor = '<span class="cursor"></span>';
@@ -64,7 +64,8 @@
 
                     if (i === line.length) {
                         clearInterval(interval);
-                        isTyping = false; // Re-enable user input
+                        isTyping = false;
+                        scrollToBottom();
                         resolve();
                     }
                 }, typingSpeed);
@@ -85,6 +86,7 @@
                 await typeLine(line);
                 await pause(1000);
                 terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '') + "<br>";
+                scrollToBottom();
             }
 
             await typeLine('"I have no voice, but I can still make you listen. What am I?"');
@@ -99,36 +101,30 @@
             removeCursor();
             clearInput();
             terminal.innerHTML += `<div id="input-container"><span id="input-line"></span><span class="cursor"></span></div>`;
-            scrollToInput();
+            scrollToBottom();
             hiddenInput.focus();
             hiddenInput.value = "";
             userInput = "";
-
-            const cursor = document.querySelector(".cursor");
-            cursor.addEventListener("click", () => {
-                hiddenInput.focus();
-                scrollToInput();
-            });
 
             hiddenInput.addEventListener("input", updateInput);
             hiddenInput.addEventListener("keydown", handleInput);
         }
 
         function updateInput() {
-            if (isTyping) return; // Ignore input during automated messages
+            if (isTyping) return; // Prevent input during automated messages
             const inputLine = document.getElementById("input-line");
             userInput = hiddenInput.value;
             inputLine.textContent = userInput;
-            scrollToInput();
+            scrollToBottom();
         }
 
         function handleInput(event) {
-            if (isTyping) return; // Block "Enter" if typing
+            if (isTyping) return; // Prevent pressing "Enter" during automated text
             if (event.key === "Enter") processInput();
         }
 
         function processInput() {
-            if (isTyping) return; // Ignore input if automated typing is active
+            if (isTyping) return;
             removeCursor();
             const currentInput = userInput.toLowerCase().trim();
             terminal.innerHTML += "<br>";
@@ -156,7 +152,7 @@
             await typeLine("You’ve found her...", 100);
             await pause(1000);
             await typeLine(" but at what cost?", 150);
-            await pause(2000);
+            await pause(2000); // Subtle pause
             terminal.innerHTML += "<br>";
             await typeLine("Goodbye...", 150);
             terminal.innerHTML += "<br>";
@@ -183,17 +179,15 @@
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
                 countdownLine.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+                scrollToBottom();
                 setTimeout(updateCountdown, 1000);
             }
 
             updateCountdown();
         }
 
-        function scrollToInput() {
-            const inputContainer = document.getElementById("input-container");
-            if (inputContainer) {
-                inputContainer.scrollIntoView({ behavior: "smooth", block: "center" });
-            }
+        function scrollToBottom() {
+            window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
         }
 
         function pause(ms) {
