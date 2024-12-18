@@ -82,11 +82,14 @@
         }
 
         function startInput() {
-            userInput = "";
-            clearInput(); // Remove any lingering input box
-            terminal.innerHTML += `<div id="input-container"><span id="input-line"></span><span class="cursor"></span></div>`;
-            document.addEventListener("keydown", handleInput);
-        }
+    removeCursor(); // Remove all cursors globally
+    clearInput();   // Remove old input container
+
+    // Add fresh input container with a single cursor
+    terminal.innerHTML += `<div id="input-container"><span id="input-line"></span><span class="cursor"></span></div>`;
+    userInput = ""; // Reset input
+    document.addEventListener("keydown", handleInput);
+}
 
         function handleInput(event) {
     const inputLine = document.getElementById("input-line");
