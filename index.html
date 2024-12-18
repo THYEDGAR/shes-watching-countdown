@@ -26,13 +26,14 @@
             height: 1.2em;
             background-color: #ec461c;
             animation: blink 0.7s steps(2, start) infinite;
+            cursor: pointer;
         }
         @keyframes blink {
             50% { opacity: 0; }
         }
         input {
             position: absolute;
-            top: -9999px; /* Hidden input */
+            top: -9999px; /* Hidden input field */
             opacity: 0;
         }
     </style>
@@ -46,8 +47,8 @@
         const hiddenInput = document.getElementById("hidden-input");
         const correctAnswer = ["echo", "an echo"];
         let userInput = "";
-        let inputAllowed = false;
 
+        // Typing effect for automated text
         async function typeLine(line, typingSpeed = 75) {
             return new Promise(resolve => {
                 let i = 0;
@@ -59,9 +60,9 @@
                     terminal.innerHTML += line[i];
                     i++;
 
+                    terminal.innerHTML += cursor;
                     if (i === line.length) {
                         clearInterval(interval);
-                        terminal.innerHTML += cursor;
                         resolve();
                     }
                 }, typingSpeed);
@@ -79,7 +80,6 @@
             ];
 
             for (const line of lines) {
-                inputAllowed = false;
                 await typeLine(line);
                 await pause(1000);
                 terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '') + "<br>";
@@ -88,18 +88,20 @@
             await typeLine('"I have no voice, but I can still make you listen. What am I?"');
             await pause(1000);
             terminal.innerHTML += "<br>";
-            await typeLine("Type your answer and press Enter.");
+            await typeLine("Type your answer and press Enter: ");
             startInput();
         }
 
         function startInput() {
             removeCursor();
-            clearInput();
-            terminal.innerHTML += `<div id="input-container">
-                                       <span id="input-line"></span><span class="cursor"></span>
-                                   </div>`;
-            hiddenInput.focus(); // Auto-focus hidden input
-            inputAllowed = true;
+            terminal.innerHTML += `<span id="input-line"></span><span class="cursor"></span>`;
+            hiddenInput.focus();
+            hiddenInput.value = "";
+            userInput = "";
+
+            // Clickable cursor for mobile
+            const cursor = document.querySelector(".cursor");
+            cursor.addEventListener("click", () => hiddenInput.focus());
 
             hiddenInput.addEventListener("input", updateInput);
             hiddenInput.addEventListener("keydown", handleInput);
@@ -108,20 +110,18 @@
         function updateInput() {
             const inputLine = document.getElementById("input-line");
             userInput = hiddenInput.value;
-            inputLine.textContent = userInput; // Update visible input text
+            inputLine.textContent = userInput; // Dynamically update text
         }
 
         function handleInput(event) {
-            if (event.key === "Enter" && inputAllowed) {
+            if (event.key === "Enter") {
                 processInput();
             }
         }
 
         function processInput() {
-            inputAllowed = false;
+            removeCursor();
             const currentInput = userInput.toLowerCase().trim();
-            clearInput();
-
             if (correctAnswer.includes(currentInput)) {
                 displaySuccess();
             } else {
@@ -130,15 +130,16 @@
         }
 
         async function displayRetry() {
+            terminal.innerHTML += "<br>";
             await typeLine("Wrong answer...", 75);
             await pause(1000);
             terminal.innerHTML += "<br>";
-            await typeLine("Try again.", 75);
-            terminal.innerHTML += "<br>";
+            await typeLine("Try again: ");
             startInput();
         }
 
         async function displaySuccess() {
+            terminal.innerHTML += "<br>";
             await typeLine("You’ve found her...", 100);
             await pause(1000);
             await typeLine(" but at what cost?", 150);
@@ -182,14 +183,7 @@
             document.querySelectorAll(".cursor").forEach(cursor => cursor.remove());
         }
 
-        function clearInput() {
-            const oldInput = document.getElementById("input-container");
-            if (oldInput) oldInput.remove();
-            hiddenInput.value = "";
-            userInput = "";
-        }
-
-        // Start the typing sequence
+        // Start typing sequence
         startTypingSequence();
     </script>
 </body>
