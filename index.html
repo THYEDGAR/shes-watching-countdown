@@ -58,21 +58,25 @@
         }
 
         async function startTypingSequence() {
-            const lines = [
-                "Greetings, stranger...",
-                "I have something for you...",
-                "A riddle: \"I have no voice, but I can still make you listen. What am I?\"",
-                "Type your answer and press Enter:"
-            ];
+    const lines = [
+        "Greetings, stranger...",
+        "I have something for you...",
+        "A riddle:" // Add pause after this
+    ];
 
-            for (const line of lines) {
-                await typeLine(line);
-                await pause(1000);
-                terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '') + "<br>";
-            }
+    for (const line of lines) {
+        await typeLine(line);
+        await pause(1000); // 1-second pause
+        terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '') + "<br>";
+    }
 
-            startInput();
-        }
+    // Add riddle separately with delay
+    await typeLine('"I have no voice, but I can still make you listen. What am I?"');
+    await pause(1000);
+    terminal.innerHTML += "<br>";
+    await typeLine("Type your answer and press Enter:");
+    startInput();
+}
 
         function startInput() {
             userInput = "";
@@ -102,11 +106,13 @@
         }
 
         async function displayRetry() {
-            clearInput(); // Remove old input line
-            await typeLine("Wrong answer... Try again:", 75);
-            terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '') + "<br>";
-            startInput();
-        }
+    clearInput(); // Remove old input line
+    await typeLine("Wrong answer...", 75); // First part
+    await pause(1000); // 1-second pause
+    await typeLine(" Try again:", 75); // Second part
+    terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '') + "<br>";
+    startInput();
+}
 
        async function displaySuccess() {
     clearInput();
