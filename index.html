@@ -14,7 +14,7 @@
             line-height: 1.5;
             white-space: pre-wrap;
             height: 100vh;
-            overflow: hidden;
+            overflow: hidden; /* Disable manual scrolling */
         }
         #terminal {
             font-size: 1.2em;
@@ -47,7 +47,6 @@
         let userInput = "";
         let isTyping = false;
 
-        // Typing effect for automated messages
         async function typeLine(line, typingSpeed = 75) {
             isTyping = true;
             return new Promise(resolve => {
@@ -64,7 +63,7 @@
                     if (i === line.length) {
                         clearInterval(interval);
                         isTyping = false;
-                        scrollToInput(true); // Scroll only after typing finishes
+                        scrollToInput(true); // Scroll after typing
                         resolve();
                     }
                 }, typingSpeed);
@@ -108,15 +107,17 @@
             clearInput();
             terminal.innerHTML += `<div id="input-container"><span id="input-line"></span><span class="cursor"></span></div>`;
             focusInput();
-            scrollToInput(true); // Scroll when input starts
+            scrollToInput(true); // Lock scroll to the input container
         }
 
         function focusInput() {
             hiddenInput.value = "";
             hiddenInput.focus();
+
             const cursor = document.querySelector(".cursor");
             cursor.addEventListener("click", () => {
                 hiddenInput.focus();
+                scrollToInput();
             });
 
             userInput = "";
@@ -124,11 +125,13 @@
             hiddenInput.onkeydown = handleInput;
         }
 
-        function updateInput() {
-            if (isTyping) return; // Prevent typing during automated messages
+        function updateInput(event) {
+            if (isTyping) return;
+            event.preventDefault(); // Prevent default scroll behavior
             const inputLine = document.getElementById("input-line");
             userInput = hiddenInput.value;
             inputLine.textContent = userInput;
+            scrollToInput(false); // Keep input in view
         }
 
         function handleInput(event) {
@@ -176,9 +179,9 @@
                 const inputContainer = document.getElementById("input-container");
                 const rect = inputContainer?.getBoundingClientRect();
 
-                // Only scroll if the input container is outside the view or forced
+                // Only scroll if the input container is outside the view
                 if (force || rect.bottom > window.innerHeight || rect.top < 0) {
-                    inputContainer.scrollIntoView({ behavior: "smooth", block: "center" });
+                    inputContainer.scrollIntoView({ behavior: "smooth", block: "end" });
                 }
             }, 50);
         }
