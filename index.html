@@ -109,23 +109,22 @@
         }
 
         async function displayRetry() {
-    clearInput(); // Remove old input box
-    removeCursor(); // Ensure lingering cursors are removed
+    removeCursor(); // Forcefully remove all existing cursors
+    clearInput(); // Clear the old input box
 
     // Add retry messages on clean lines
-    terminal.innerHTML += "<br>";
+    terminal.innerHTML += "<br>"; // Move to a new line
     await typeLine("Wrong answer...", 75);
     await pause(1000);
 
     terminal.innerHTML += "<br>"; // New line for "Try again:"
-    await typeLine("Try again:", 75);
+    await typeLine("Try again.", 75);
 
-    // Start new input on a clean line
+    // Restart the input cleanly
     terminal.innerHTML += "<br>";
-    removeCursor(); // Double-check to clear any lingering cursor
+    removeCursor(); // Double-check to ensure no lingering cursor exists
     startInput();
 }
-
         async function displaySuccess() {
             clearInput();
             await typeLine("You’ve found her...", 100);
