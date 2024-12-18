@@ -49,23 +49,25 @@
 
         // Typing effect for dynamic lines
         async function typeLine(line, typingSpeed = 75) {
-            return new Promise(resolve => {
-                let i = 0;
-                const cursor = '<span class="cursor"></span>';
-                removeCursor();
-                const interval = setInterval(() => {
-                    terminal.innerHTML = terminal.innerHTML.replace(cursor, "");
-                    terminal.innerHTML += line[i];
-                    i++;
-                    terminal.innerHTML += cursor;
-                    scrollToBottom(); // Scroll after adding text
-                    if (i === line.length) {
-                        clearInterval(interval);
-                        resolve();
-                    }
-                }, typingSpeed);
-            });
-        }
+    return new Promise(resolve => {
+        let i = 0;
+        const cursor = '<span class="cursor"></span>';
+        removeCursor();
+
+        const interval = setInterval(() => {
+            terminal.innerHTML = terminal.innerHTML.replace(cursor, "");
+            terminal.innerHTML += line[i];
+            i++;
+
+            if (i === line.length) {
+                clearInterval(interval);
+                terminal.innerHTML += cursor;
+                scrollToBottom(); // Scroll **after** the line finishes typing
+                resolve();
+            }
+        }, typingSpeed);
+    });
+}
 
         async function startTypingSequence() {
             const lines = [
@@ -95,15 +97,20 @@
         }
 
         function startInput() {
-            removeCursor(); // Remove all cursors globally
-            clearInput();   // Remove old input container
+    removeCursor(); // Remove all lingering cursors
+    clearInput();   // Clear any previous input container
 
-            // Add fresh input container with a single cursor
-            terminal.innerHTML += `<div id="input-container"><span id="input-line"></span><span class="cursor"></span></div>`;
-            userInput = ""; // Reset input
-            scrollToBottom(); // Ensure cursor is visible
-            document.addEventListener("keydown", handleInput);
-        }
+    // Force a visible new input line
+    const inputContainer = `<div id="input-container">
+                                <span id="input-line"></span>
+                                <span class="cursor"></span>
+                            </div>`;
+    terminal.innerHTML += inputContainer;
+
+    userInput = ""; // Reset input text
+    scrollToBottom(); // Scroll down to keep input in view
+    document.addEventListener("keydown", handleInput);
+}
 
         function handleInput(event) {
             const inputLine = document.getElementById("input-line");
