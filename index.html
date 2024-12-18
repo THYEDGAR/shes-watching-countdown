@@ -25,6 +25,7 @@
             height: 1.2em;
             background-color: #ec461c;
             animation: blink 0.7s steps(2, start) infinite;
+            cursor: pointer; /* Add pointer cursor for clickable behavior */
         }
         @keyframes blink {
             50% { opacity: 0; }
@@ -38,6 +39,7 @@
         const terminal = document.getElementById("terminal");
         const correctAnswer = ["echo", "an echo"]; // Accept multiple correct answers
         let userInput = "";
+        let inputAllowed = false; // Controls whether typing is allowed
 
         // Typing effect for dynamic lines
         async function typeLine(line, typingSpeed = 75) {
@@ -71,6 +73,7 @@
             ];
 
             for (const line of lines) {
+                inputAllowed = false; // Disable input during automated messages
                 await typeLine(line);
                 await pause(1000);
                 terminal.innerHTML = terminal.innerHTML.replace('<span class="cursor"></span>', '') + "<br>";
@@ -95,11 +98,22 @@
                                     </div>`;
             terminal.innerHTML += inputContainer;
 
+            const cursor = document.querySelector(".cursor");
+            cursor.addEventListener("click", () => focusInput()); // Make the cursor clickable
+
+            inputAllowed = true; // Allow input after messages finish
             userInput = ""; // Reset input text
-            document.addEventListener("keydown", handleInput);
+        }
+
+        function focusInput() {
+            if (!inputAllowed) return; // Prevent focusing if input isn't allowed
+            const inputLine = document.getElementById("input-line");
+            inputLine.focus(); // Simulate focus for the input line
         }
 
         function handleInput(event) {
+            if (!inputAllowed) return; // Ignore input if not allowed
+
             const inputLine = document.getElementById("input-line");
             if (event.key === "Enter") {
                 removeCursor(); // Clear all cursors before processing input
