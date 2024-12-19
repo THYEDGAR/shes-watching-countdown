@@ -147,14 +147,54 @@
             const inputContainer = document.getElementById("input-container");
 
             if (correctAnswer.includes(currentInput)) {
-                await typeResponse("You’ve found her...", inputContainer);
-                await pause(1000);
-                await typeResponse(" but at what cost?", inputContainer);
-                await pause(2000);
-                await typeResponse("Goodbye...", inputContainer);
+                await displaySuccess();
             } else {
                 await displayRetry(inputContainer);
             }
+        }
+
+        async function displaySuccess() {
+            const successMessages = [
+                "You’ve found her...",
+                "but at what cost?",
+                "Goodbye..."
+            ];
+
+            for (const message of successMessages) {
+                const lineContainer = document.createElement("div");
+                terminal.appendChild(lineContainer);
+                await typeLine(message, lineContainer);
+                await pause(1000);
+            }
+
+            // Add countdown in a new line
+            const countdownContainer = document.createElement("div");
+            terminal.appendChild(countdownContainer);
+            startCountdown(countdownContainer);
+        }
+
+        function startCountdown(container) {
+            const countdownTarget = new Date("2025-01-01T00:00:00").getTime();
+
+            function updateCountdown() {
+                const now = new Date().getTime();
+                const distance = countdownTarget - now;
+
+                if (distance < 0) {
+                    container.textContent = "SHE'S HERE!";
+                    return;
+                }
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                container.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+                setTimeout(updateCountdown, 1000);
+            }
+
+            updateCountdown();
         }
 
         async function displayRetry(container) {
