@@ -53,19 +53,15 @@
         let isTyping = false;
 
         // Typing effect for automated messages
-        async function typeLine(line, typingSpeed = 75) {
+        async function typeLine(line, container, typingSpeed = 75) {
             isTyping = true;
-            const lineContainer = document.createElement("div");
-            terminal.appendChild(lineContainer);
-
             let output = "";
             for (let i = 0; i < line.length; i++) {
                 output += line[i];
-                lineContainer.innerHTML = output + '<span class="cursor"></span>';
+                container.innerHTML = output + '<span class="cursor"></span>';
                 await pause(typingSpeed);
             }
-
-            lineContainer.innerHTML = output; // Remove cursor when done
+            container.innerHTML = output; // Remove cursor when done
             isTyping = false;
         }
 
@@ -80,7 +76,9 @@
             ];
 
             for (const line of lines) {
-                await typeLine(line);
+                const lineContainer = document.createElement("div");
+                terminal.appendChild(lineContainer);
+                await typeLine(line, lineContainer);
                 await pause(1000); // Pause between lines
             }
 
@@ -97,7 +95,9 @@
             ];
 
             for (const line of riddle) {
-                await typeLine(line);
+                const lineContainer = document.createElement("div");
+                terminal.appendChild(lineContainer);
+                await typeLine(line, lineContainer);
                 await pause(1000);
             }
         }
@@ -165,11 +165,16 @@
             // Backspace animation
             await deleteText(container);
 
-            // Display "Try again."
-            await typeResponse("Try again.", container);
+            // Display "Try again!"
+            await typeResponse("Try again!", container);
+            await pause(1000);
 
-            hiddenInput.value = "";
-            userInput = "";
+            // Backspace animation for "Try again!"
+            await deleteText(container);
+
+            // Ready for user input again
+            container.innerHTML = `<span id="input-line"></span><span class="cursor"></span>`;
+            focusInput();
         }
 
         async function typeResponse(message, container) {
