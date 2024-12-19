@@ -158,13 +158,13 @@
     hiddenInput.blur(); // Ensure no interaction
 
     // Explicitly remove the flashing cursor
-    removeCursor(); 
+    removeCursor();
 
-    // Combine "You’ve found her... but at what cost?"
+    // Combine "You’ve found her... but at what cost?" into the same line
     await typeLine("You’ve found her...");
-    await pause(2000); // Pause for 2 seconds
-    terminal.innerHTML += " but at what cost?<br>";
-    await pause(2000); // Pause for another 2 seconds
+    await pause(2000); // Subtle pause for dramatic effect
+    terminal.innerHTML = terminal.innerHTML.replace(/You’ve found her\.\.\.$/, "You’ve found her... but at what cost?<br>");
+    await pause(2000); // Another pause for tension
 
     // Display "Goodbye..." on a new line
     await typeLine("Goodbye...");
