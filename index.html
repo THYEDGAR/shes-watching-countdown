@@ -153,36 +153,41 @@
         }
 
         async function displaySuccess() {
-            // Disable further input
-            hiddenInput.disabled = true;
-            hiddenInput.blur(); // Ensure no interaction
+    // Disable further input
+    hiddenInput.disabled = true;
+    hiddenInput.blur(); // Ensure no interaction
+    removeCursor(); // Remove the flashing cursor explicitly
 
-            // Combine "You’ve found her...but at what cost?"
-            const successLine = "You’ve found her...";
-            const lineContainer = document.createElement("div");
-            terminal.appendChild(lineContainer);
+    // Combine "You’ve found her...but at what cost?"
+    const successLine = "You’ve found her...";
+    const lineContainer = document.createElement("div");
+    terminal.appendChild(lineContainer);
 
-            let output = "";
-            for (let i = 0; i < successLine.length; i++) {
-                output += successLine[i];
-                lineContainer.innerHTML = output + '<span class="cursor"></span>';
-                await pause(100);
-            }
+    let output = "";
+    for (let i = 0; i < successLine.length; i++) {
+        output += successLine[i];
+        lineContainer.innerHTML = output + '<span class="cursor"></span>';
+        await pause(100);
+    }
 
-            await pause(2000);
-            lineContainer.innerHTML = successLine + " but at what cost?"; // Combine message
-            await pause(2000);
+    await pause(2000);
+    lineContainer.innerHTML = successLine + " but at what cost?"; // Combine message
+    await pause(2000);
 
-            // Display "Goodbye..." on a new line
-            const goodbyeContainer = document.createElement("div");
-            terminal.appendChild(goodbyeContainer);
-            await typeLine("Goodbye...", 150);
+    // Display "Goodbye..." on a new line
+    const goodbyeContainer = document.createElement("div");
+    terminal.appendChild(goodbyeContainer);
+    await typeLine("Goodbye...", 150);
 
-            // Add countdown in a new line
-            const countdownContainer = document.createElement("div");
-            terminal.appendChild(countdownContainer);
-            startCountdown(countdownContainer);
-        }
+    // Add countdown in a new line
+    const countdownContainer = document.createElement("div");
+    terminal.appendChild(countdownContainer);
+    startCountdown(countdownContainer);
+}
+
+function removeCursor() {
+    document.querySelectorAll(".cursor").forEach(cursor => cursor.remove());
+}
 
         function startCountdown(container) {
             const countdownTarget = new Date("2025-01-01T00:00:00").getTime();
