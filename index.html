@@ -154,13 +154,21 @@
         }
 
         async function displaySuccess() {
-            // Success flow with pauses and new lines
-            await typeLine("You’ve found her...");
-            await pause(2000); // Subtle pause
-            await typeLine("but at what cost?");
-            await pause(2000); // Subtle pause
+            // Disable further input
+            hiddenInput.disabled = true;
+
+            // Combine "You’ve found her...but at what cost?"
+            const successLine = "You’ve found her...";
+            const lineContainer = document.createElement("div");
+            terminal.appendChild(lineContainer);
+
+            await typeLine(successLine, 100);
+            await pause(2000);
+            await typeLine(" but at what cost?", 100);
+
+            // Display "Goodbye..." on a new line
+            await pause(2000);
             await typeLine("Goodbye...");
-            await pause(2000); // Subtle pause
 
             // Add countdown in a new line
             const countdownContainer = document.createElement("div");
