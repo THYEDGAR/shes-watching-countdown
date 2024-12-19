@@ -13,7 +13,7 @@
             padding: 20px;
             line-height: 1.5;
             white-space: pre-wrap;
-            overflow: hidden; /* Prevent scrolling */
+            overflow: hidden;
         }
 
         #terminal {
@@ -64,6 +64,7 @@
                 lineContainer.innerHTML = output + '<span class="cursor"></span>';
                 await pause(typingSpeed);
             }
+
             lineContainer.innerHTML = output; // Remove cursor when done
             isTyping = false;
         }
@@ -109,10 +110,24 @@
             inputContainer.innerHTML = `<span id="input-line"></span><span class="cursor"></span>`;
             terminal.appendChild(inputContainer);
 
+            focusInput();
+        }
+
+        function focusInput() {
             hiddenInput.value = "";
             hiddenInput.focus();
-            userInput = "";
 
+            const cursor = document.querySelector(".cursor");
+
+            // Ensure PC users can type immediately without clicking
+            hiddenInput.focus();
+
+            // Allow mobile users to tap the cursor to open the keyboard
+            cursor.addEventListener("click", () => {
+                hiddenInput.focus();
+            });
+
+            userInput = "";
             hiddenInput.oninput = updateInput;
             hiddenInput.onkeydown = handleInput;
         }
