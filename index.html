@@ -52,7 +52,6 @@
         let userInput = "";
         let isTyping = false;
 
-        // Typing effect for automated messages
         async function typeLine(line, typingSpeed = 75) {
             isTyping = true;
             const lineContainer = document.createElement("div");
@@ -156,19 +155,28 @@
         async function displaySuccess() {
             // Disable further input
             hiddenInput.disabled = true;
+            hiddenInput.blur(); // Ensure no interaction
 
             // Combine "You’ve found her...but at what cost?"
             const successLine = "You’ve found her...";
             const lineContainer = document.createElement("div");
             terminal.appendChild(lineContainer);
 
-            await typeLine(successLine, 100);
+            let output = "";
+            for (let i = 0; i < successLine.length; i++) {
+                output += successLine[i];
+                lineContainer.innerHTML = output + '<span class="cursor"></span>';
+                await pause(100);
+            }
+
             await pause(2000);
-            await typeLine(" but at what cost?", 100);
+            lineContainer.innerHTML = successLine + " but at what cost?"; // Combine message
+            await pause(2000);
 
             // Display "Goodbye..." on a new line
-            await pause(2000);
-            await typeLine("Goodbye...");
+            const goodbyeContainer = document.createElement("div");
+            terminal.appendChild(goodbyeContainer);
+            await typeLine("Goodbye...", 150);
 
             // Add countdown in a new line
             const countdownContainer = document.createElement("div");
