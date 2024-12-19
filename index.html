@@ -53,15 +53,19 @@
         let isTyping = false;
 
         // Typing effect for automated messages
-        async function typeLine(line, container, typingSpeed = 75) {
+        async function typeLine(line, typingSpeed = 75) {
             isTyping = true;
+            const lineContainer = document.createElement("div");
+            terminal.appendChild(lineContainer);
+
             let output = "";
             for (let i = 0; i < line.length; i++) {
                 output += line[i];
-                container.innerHTML = output + '<span class="cursor"></span>';
+                lineContainer.innerHTML = output + '<span class="cursor"></span>';
                 await pause(typingSpeed);
             }
-            container.innerHTML = output; // Remove cursor when done
+
+            lineContainer.innerHTML = output; // Remove cursor when done
             isTyping = false;
         }
 
@@ -76,9 +80,7 @@
             ];
 
             for (const line of lines) {
-                const lineContainer = document.createElement("div");
-                terminal.appendChild(lineContainer);
-                await typeLine(line, lineContainer);
+                await typeLine(line);
                 await pause(1000); // Pause between lines
             }
 
@@ -95,9 +97,7 @@
             ];
 
             for (const line of riddle) {
-                const lineContainer = document.createElement("div");
-                terminal.appendChild(lineContainer);
-                await typeLine(line, lineContainer);
+                await typeLine(line);
                 await pause(1000);
             }
         }
@@ -154,18 +154,13 @@
         }
 
         async function displaySuccess() {
-            const successMessages = [
-                "You’ve found her...",
-                "but at what cost?",
-                "Goodbye..."
-            ];
-
-            for (const message of successMessages) {
-                const lineContainer = document.createElement("div");
-                terminal.appendChild(lineContainer);
-                await typeLine(message, lineContainer);
-                await pause(1000);
-            }
+            // Success flow with pauses and new lines
+            await typeLine("You’ve found her...");
+            await pause(2000); // Subtle pause
+            await typeLine("but at what cost?");
+            await pause(2000); // Subtle pause
+            await typeLine("Goodbye...");
+            await pause(2000); // Subtle pause
 
             // Add countdown in a new line
             const countdownContainer = document.createElement("div");
