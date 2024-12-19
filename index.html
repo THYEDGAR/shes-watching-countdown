@@ -152,21 +152,22 @@
             }
         }
 
-        async function displaySuccess() {
+ async function displaySuccess() {
     // Disable further input
     hiddenInput.disabled = true;
     hiddenInput.blur(); // Ensure no interaction
 
     // Explicitly remove the flashing cursor
-    removeCursor(); 
+    removeCursor();
 
-    // Combine "You’ve found her... but at what cost?"
+    // Combine "You’ve found her... but at what cost?" into a single animated sequence
     await typeLine("You’ve found her...");
     await pause(2000); // Pause for 2 seconds
-    terminal.innerHTML += "but at what cost?<br>";
+    await typeLine(" but at what cost?"); // Continue typing on the same line
     await pause(2000); // Pause for another 2 seconds
 
     // Display "Goodbye..." on a new line
+    terminal.innerHTML += "<br>";
     await typeLine("Goodbye...");
     await pause(1000);
 
