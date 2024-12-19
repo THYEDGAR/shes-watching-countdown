@@ -118,14 +118,7 @@
             hiddenInput.focus();
 
             const cursor = document.querySelector(".cursor");
-
-            // Ensure PC users can type immediately without clicking
-            hiddenInput.focus();
-
-            // Allow mobile users to tap the cursor to open the keyboard
-            cursor.addEventListener("click", () => {
-                hiddenInput.focus();
-            });
+            cursor.addEventListener("click", () => hiddenInput.focus());
 
             userInput = "";
             hiddenInput.oninput = updateInput;
@@ -152,7 +145,6 @@
 
             const currentInput = userInput.toLowerCase().trim();
             const inputContainer = document.getElementById("input-container");
-            const inputLine = document.getElementById("input-line");
 
             if (correctAnswer.includes(currentInput)) {
                 await typeResponse("You’ve found her...", inputContainer);
@@ -161,13 +153,23 @@
                 await pause(2000);
                 await typeResponse("Goodbye...", inputContainer);
             } else {
-                await typeResponse("Wrong answer...", inputContainer);
-                await pause(1000);
-                inputLine.textContent = ""; // Clear input line
-                await typeResponse("Try again:", inputContainer);
-                hiddenInput.value = "";
-                userInput = "";
+                await displayRetry(inputContainer);
             }
+        }
+
+        async function displayRetry(container) {
+            // Display "Wrong answer..."
+            await typeResponse("Wrong answer...", container);
+            await pause(1000);
+
+            // Backspace animation
+            await deleteText(container);
+
+            // Display "Try again."
+            await typeResponse("Try again.", container);
+
+            hiddenInput.value = "";
+            userInput = "";
         }
 
         async function typeResponse(message, container) {
@@ -178,6 +180,14 @@
                 await pause(50);
             }
             container.innerHTML = output; // Remove cursor when done
+        }
+
+        async function deleteText(container) {
+            const currentText = container.textContent;
+            for (let i = currentText.length; i >= 0; i--) {
+                container.innerHTML = currentText.slice(0, i) + '<span class="cursor"></span>';
+                await pause(50);
+            }
         }
 
         function pause(ms) {
