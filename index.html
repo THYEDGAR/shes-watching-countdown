@@ -70,12 +70,10 @@
 
         async function startTypingSequence() {
             const lines = [
-                "Greetings, stranger...",
-                "It's been a while...",
-                "But it's also nice seeing you again...",
-                "I have something for you...",
-                "A riddle!",
-                "Pay close attention..."
+                "Something's not right...",
+                "But you can feel it too, can't you?",
+                "It's calling out...",
+                "But what is it?"
             ];
 
             for (const line of lines) {
@@ -89,9 +87,10 @@
 
         async function displayRiddle() {
             const riddle = [
-                'I have no form but can take any shape.',
-                'I am neither light nor shadow, but I still escape.',
-                'I grow when you’re loud and fade when you’re still.',
+                'I am the whisper in the static,',
+                'the shadow in the glow.',
+                'I know what you have forgetten',
+                'but where, you will never know.',
                 "What am I?"
             ];
 
@@ -161,14 +160,19 @@
     removeCursor();
 
     // Combine "You’ve found her... but at what cost?" into a single animated sequence
-    await typeLine("You’ve found her...");
+    await typeLine("You’ve seen through it...");
     await pause(2000); // Pause for 2 seconds
-    await typeLine(" but at what cost?"); // Continue typing on the same line
+    await typeLine("But knowing comes with a price."); // Continue typing on the same line
     await pause(2000); // Pause for another 2 seconds
+    await typeLine("It's too late to turn back now.");
+    await pause(1500);
+    await typeLine("She's watching...");
+    await pause(2000);
+     
 
     // Display "Goodbye..." on a new line
     terminal.innerHTML += "<br>";
-    await typeLine("Goodbye...");
+    await typeLine("Prepare yourself...");
     await pause(1000);
 
     // Add countdown on a new line
