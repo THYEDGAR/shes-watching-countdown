@@ -48,7 +48,7 @@
     <script>
         const terminal = document.getElementById("terminal");
         const hiddenInput = document.getElementById("hidden-input");
-        const correctAnswer = ["memory", "a memory"];
+        const correctAnswer = ["cave", "a cave"];
         let userInput = "";
         let isTyping = false;
 
@@ -70,10 +70,10 @@
 
         async function startTypingSequence() {
             const lines = [
-                "Something's not right...",
-                "But you can feel it too, can't you?",
-                "It's calling out...",
-                "But what is it?"
+                "Merry Christmas...or is it?",
+                "Not all gifts are wrapped in ribbons.",
+                "Some are buried...hidden where no light can reach.",
+                "Go ahead, unwrap what's inside...if you dare."
             ];
 
             for (const line of lines) {
@@ -87,10 +87,10 @@
 
         async function displayRiddle() {
             const riddle = [
-                'I am the whisper in the static,',
-                'the shadow in the glow.',
-                'I know what you have forgetten',
-                'but where, you will never know.',
+                'I am hollow but hold countless stories.',
+                'My walls have heard secrets older than time.',
+                'In darkness, I hide what light cannot see.',
+                'I swallow echoes and shelter shadows.',
                 "What am I?"
             ];
 
@@ -160,20 +160,22 @@
     removeCursor();
 
     // Combine "You’ve found her... but at what cost?" into a single animated sequence
-    await typeLine("You’ve seen through it...");
+    await typeLine("The truth waits where the shadows rest.");
     await pause(2000); // Pause for 2 seconds
-    await typeLine("But knowing comes with a price."); // Continue typing on the same line
-    await pause(2000); // Pause for another 2 seconds
-    await typeLine("It's too late to turn back now.");
+    await typeLine("Look deeper into the cave..."); // Continue typing on the same line
+    await pause(1500); // Pause for another 2 seconds
+    await typeLine("and you may find what was meant to stay hidden.");
     await pause(1500);
-    await typeLine("She's watching...");
-    await pause(2000);
      
 
     // Display "Goodbye..." on a new line
     terminal.innerHTML += "<br>";
-    await typeLine("Prepare yourself...");
+    await typeLine("See you soon...");
     await pause(1000);
+
+     // Add a clickable hyperlink
+terminal.innerHTML += `<br><a href="https://www.roblox.com/games/15635186486/CHRISTMAS-OBBY" target="_blank" style="color: #ec461c; text-decoration: underline;">Click Me</a>`;
+await pause(1000);
 
     // Add countdown on a new line
     const countdownContainer = document.createElement("div");
