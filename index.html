@@ -57,10 +57,31 @@
         }
 
         async function startTypingSequence() {
-            // Display "It's almost time... are you ready?"
-            await typeLine("It's almost time...");
-            await pause(1500); // Pause for dramatic effect
-            await typeLine("are you ready?");
+            // Display "It's almost time... are you ready?" in ONE line with pause
+            const lineContainer = document.createElement("div");
+            terminal.appendChild(lineContainer);
+
+            let output = "";
+            const message1 = "It's almost time...";
+            const message2 = " are you ready?";
+
+            // Type first part
+            for (let i = 0; i < message1.length; i++) {
+                output += message1[i];
+                lineContainer.innerHTML = output + '<span class="cursor"></span>';
+                await pause(75);
+            }
+
+            await pause(1500); // Pause before second part
+
+            // Type second part
+            for (let i = 0; i < message2.length; i++) {
+                output += message2[i];
+                lineContainer.innerHTML = output + '<span class="cursor"></span>';
+                await pause(75);
+            }
+
+            lineContainer.innerHTML = output; // Remove cursor when done
             await pause(1000);
 
             // Display countdown on a new line
