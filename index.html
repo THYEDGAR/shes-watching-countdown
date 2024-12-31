@@ -33,13 +33,24 @@
         @keyframes blink {
             50% { opacity: 0; }
         }
+
+        /* Countdown styling - LARGE FONT */
+        #countdown {
+            font-size: 3em; /* Huge font size */
+            font-weight: bold;
+            color: #ec461c;
+            margin-top: 20px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div id="terminal"></div>
+    <div id="countdown"></div> <!-- Countdown added here -->
 
     <script>
         const terminal = document.getElementById("terminal");
+        const countdownContainer = document.getElementById("countdown");
 
         // Typing effect for automated messages
         async function typeLine(line, typingSpeed = 75) {
@@ -84,13 +95,11 @@
             lineContainer.innerHTML = output; // Remove cursor when done
             await pause(1000);
 
-            // Display countdown on a new line
-            const countdownContainer = document.createElement("div");
-            terminal.appendChild(countdownContainer);
-            startCountdown(countdownContainer);
+            // Start the countdown
+            startCountdown();
         }
 
-        function startCountdown(container) {
+        function startCountdown() {
             const countdownTarget = new Date("2025-01-01T08:00:00").getTime();
 
             function updateCountdown() {
@@ -98,7 +107,7 @@
                 const distance = countdownTarget - now;
 
                 if (distance < 0) {
-                    container.textContent = "SHE'S HERE!";
+                    countdownContainer.textContent = "SHE'S HERE!";
                     return;
                 }
 
@@ -107,7 +116,8 @@
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-                container.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+                // Update countdown with large font
+                countdownContainer.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
                 setTimeout(updateCountdown, 1000);
             }
 
