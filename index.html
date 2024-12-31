@@ -22,6 +22,25 @@
             flex-direction: column;
         }
 
+        /* Countdown Styling - LARGE FONT */
+        #countdown {
+            font-size: 3em; /* Huge font size */
+            font-weight: bold;
+            color: #ec461c;
+            margin-top: 20px;
+            text-align: center;
+            animation: pulse 1s steps(2, start) infinite; /* Default slow pulse */
+        }
+
+        @keyframes pulse {
+            50% { opacity: 0; }
+        }
+
+        @keyframes fastPulse {
+            50% { opacity: 0; }
+        }
+
+        /* Cursor Animation */
         .cursor {
             display: inline-block;
             width: 10px;
@@ -32,15 +51,6 @@
 
         @keyframes blink {
             50% { opacity: 0; }
-        }
-
-        /* Countdown styling - LARGE FONT */
-        #countdown {
-            font-size: 3em; /* Huge font size */
-            font-weight: bold;
-            color: #ec461c;
-            margin-top: 20px;
-            text-align: center;
         }
     </style>
 </head>
@@ -107,7 +117,9 @@
                 const distance = countdownTarget - now;
 
                 if (distance < 0) {
+                    // Update countdown to "SHE'S HERE!" with fast pulsing
                     countdownContainer.textContent = "SHE'S HERE!";
+                    countdownContainer.style.animation = "fastPulse 0.3s steps(2, start) infinite"; // Rapid pulse
                     return;
                 }
 
@@ -116,8 +128,18 @@
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-                // Update countdown with large font
+                // Update countdown timer text
                 countdownContainer.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+                // Dynamically adjust pulse speed based on time remaining
+                if (distance < 60000) { // Under 1 minute
+                    countdownContainer.style.animation = "pulse 0.3s steps(2, start) infinite"; // Fast pulse
+                } else if (distance < 300000) { // Under 5 minutes
+                    countdownContainer.style.animation = "pulse 0.5s steps(2, start) infinite"; // Moderate pulse
+                } else {
+                    countdownContainer.style.animation = "pulse 1s steps(2, start) infinite"; // Default pulse
+                }
+
                 setTimeout(updateCountdown, 1000);
             }
 
