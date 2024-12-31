@@ -33,27 +33,16 @@
         @keyframes blink {
             50% { opacity: 0; }
         }
-
-        input {
-            position: absolute;
-            top: -9999px; /* Hidden input field */
-            opacity: 0;
-        }
     </style>
 </head>
 <body>
     <div id="terminal"></div>
-    <input type="text" id="hidden-input" autocomplete="off" />
 
     <script>
         const terminal = document.getElementById("terminal");
-        const hiddenInput = document.getElementById("hidden-input");
-        const correctAnswer = ["cave", "a cave"];
-        let userInput = "";
-        let isTyping = false;
 
+        // Typing effect for automated messages
         async function typeLine(line, typingSpeed = 75) {
-            isTyping = true;
             const lineContainer = document.createElement("div");
             terminal.appendChild(lineContainer);
 
@@ -65,130 +54,23 @@
             }
 
             lineContainer.innerHTML = output; // Remove cursor when done
-            isTyping = false;
         }
 
         async function startTypingSequence() {
-            const lines = [
-                "Merry Christmas...or is it?",
-                "Not all gifts are wrapped in ribbons.",
-                "Some are buried...hidden where no light can reach.",
-                "Go ahead, unwrap what's inside...if you dare."
-            ];
+            // Display "It's almost time... are you ready?"
+            await typeLine("It's almost time...");
+            await pause(1500); // Pause for dramatic effect
+            await typeLine("are you ready?");
+            await pause(1000);
 
-            for (const line of lines) {
-                await typeLine(line);
-                await pause(1000); // Pause between lines
-            }
-
-            await displayRiddle();
-            startInput();
+            // Display countdown on a new line
+            const countdownContainer = document.createElement("div");
+            terminal.appendChild(countdownContainer);
+            startCountdown(countdownContainer);
         }
-
-        async function displayRiddle() {
-            const riddle = [
-                'I am hollow but hold countless stories.',
-                'My walls have heard secrets older than time.',
-                'In darkness, I hide what light cannot see.',
-                'I swallow echoes and shelter shadows.',
-                "What am I?"
-            ];
-
-            for (const line of riddle) {
-                await typeLine(line);
-                await pause(1000);
-            }
-        }
-
-        function startInput() {
-            if (isTyping) return;
-
-            const inputContainer = document.createElement("div");
-            inputContainer.id = "input-container";
-            inputContainer.innerHTML = `<span id="input-line"></span><span class="cursor"></span>`;
-            terminal.appendChild(inputContainer);
-
-            focusInput();
-        }
-
-        function focusInput() {
-            hiddenInput.value = "";
-            hiddenInput.focus();
-
-            const cursor = document.querySelector(".cursor");
-            cursor.addEventListener("click", () => hiddenInput.focus());
-
-            userInput = "";
-            hiddenInput.oninput = updateInput;
-            hiddenInput.onkeydown = handleInput;
-        }
-
-        function updateInput() {
-            if (isTyping) return;
-            const inputLine = document.getElementById("input-line");
-            userInput = hiddenInput.value;
-            inputLine.textContent = userInput;
-        }
-
-        async function handleInput(event) {
-            if (isTyping) return;
-
-            if (event.key === "Enter") {
-                processInput();
-            }
-        }
-
-        async function processInput() {
-            if (isTyping) return;
-
-            const currentInput = userInput.toLowerCase().trim();
-            const inputContainer = document.getElementById("input-container");
-
-            if (correctAnswer.includes(currentInput)) {
-                await displaySuccess();
-            } else {
-                await displayRetry(inputContainer);
-            }
-        }
-
- async function displaySuccess() {
-    // Disable further input
-    hiddenInput.disabled = true;
-    hiddenInput.blur(); // Ensure no interaction
-
-    // Explicitly remove the flashing cursor
-    removeCursor();
-
-    // Combine "You’ve found her... but at what cost?" into a single animated sequence
-    await typeLine("The truth waits where the shadows rest.");
-    await pause(2000); // Pause for 2 seconds
-    await typeLine("Look deeper into the cave..."); // Continue typing on the same line
-    await pause(1500); // Pause for another 2 seconds
-    await typeLine("and you may find what was meant to stay hidden.");
-    await pause(1500);
-     
-
-    // Display "Goodbye..." on a new line
-    terminal.innerHTML += "<br>";
-    await typeLine("See you soon...");
-    await pause(1000);
-
-     // Add a clickable hyperlink
-terminal.innerHTML += `<br><a href="https://www.roblox.com/games/15635186486/CHRISTMAS-OBBY" target="_blank" style="color: #ec461c; text-decoration: underline;">Click Me to Find Out</a>`;
-await pause(1000);
-
-    // Add countdown on a new line
-    const countdownContainer = document.createElement("div");
-    terminal.appendChild(countdownContainer);
-    startCountdown(countdownContainer);
-}
-
-function removeCursor() {
-    document.querySelectorAll(".cursor").forEach(cursor => cursor.remove());
-}
 
         function startCountdown(container) {
-            const countdownTarget = new Date("2025-01-01T00:00:00").getTime();
+            const countdownTarget = new Date("2025-01-01T08:00:00").getTime();
 
             function updateCountdown() {
                 const now = new Date().getTime();
@@ -211,48 +93,11 @@ function removeCursor() {
             updateCountdown();
         }
 
-        async function displayRetry(container) {
-            // Display "Wrong answer..."
-            await typeResponse("Wrong answer...", container);
-            await pause(1000);
-
-            // Backspace animation
-            await deleteText(container);
-
-            // Display "Try again!"
-            await typeResponse("Try again!", container);
-            await pause(1000);
-
-            // Backspace animation for "Try again!"
-            await deleteText(container);
-
-            // Ready for user input again
-            container.innerHTML = `<span id="input-line"></span><span class="cursor"></span>`;
-            focusInput();
-        }
-
-        async function typeResponse(message, container) {
-            let output = "";
-            for (let i = 0; i < message.length; i++) {
-                output += message[i];
-                container.innerHTML = output + '<span class="cursor"></span>';
-                await pause(50);
-            }
-            container.innerHTML = output; // Remove cursor when done
-        }
-
-        async function deleteText(container) {
-            const currentText = container.textContent;
-            for (let i = currentText.length; i >= 0; i--) {
-                container.innerHTML = currentText.slice(0, i) + '<span class="cursor"></span>';
-                await pause(50);
-            }
-        }
-
         function pause(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
+        // Start the sequence
         startTypingSequence();
     </script>
 </body>
