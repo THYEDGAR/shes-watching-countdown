@@ -121,11 +121,10 @@
                 const distance = countdownTarget - now;
 
                 if (distance < 0) {
-                    // Update countdown to "SHE'S HERE!" with fast pulsing
-                    countdownContainer.textContent = "CONTROL";
-                    countdownContainer.style.animation = "fastPulse 0.1s steps(2, start) infinite"; // Rapid pulse
-                    return;
-                }
+    // Update countdown to "CONTROL" with fast pulsing
+    countdownContainer.innerHTML = '<a href="https://youtu.be/_bjzPwN6JEo" target="_blank" style="color: #ec461c; text-decoration: none; animation: fastPulse 0.1s steps(2, start) infinite;">CONTROL</a>';
+    return;
+}
 
                 const days = Math.floor(distance / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
